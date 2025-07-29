@@ -7,7 +7,6 @@ from dependency_injector.wiring import inject
 from fastapi import FastAPI
 
 
-@inject
 @asynccontextmanager
 async def lifespan(
     app: FastAPI,  # pylint: disable=unused-argument

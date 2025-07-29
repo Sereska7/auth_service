@@ -26,7 +26,6 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 target_metadata = Base.metadata
-print("Tables registered for Alembic:", target_metadata.tables.keys())
 
 # Инициализируем контейнер
 container = PostgresSQL()

@@ -213,6 +213,27 @@ class APIServer(_Settings):
     ENVIROMENT: Literal["dev", "prod"] = "dev"
 
 
+class JWTSettings(_Settings):
+    """JWT (token) security settings."""
+
+    #: SecretStr: Secret key used to encode and decode JWT tokens
+    SECRET_KEY: SecretStr = SecretStr("super-secret")
+
+    REFRESH_SECRET_KEY: SecretStr = SecretStr("super-secret")
+
+    #: str: Algorithm for encoding tokens, usually "HS256"
+    ALGORITHM: str = "HS256"
+
+    #: int: Expiration time for access token in minutes
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
+
+    #: int: Expiration time for refresh token in days
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+
+    #: Optional[str]: Audience or subject claim, optional
+    AUDIENCE: str | None = None
+
+
 class Clients(_Settings):
     pass
 
@@ -226,6 +247,9 @@ class Settings(_Settings):
 
     #: APIServer: API settings. Contains all settings for API.
     API: APIServer
+
+    #: JWTSettings: Token config
+    JWT: JWTSettings
 
     #: Postgresql: Postgresql settings.
     POSTGRES: Postgresql
