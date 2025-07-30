@@ -1,6 +1,6 @@
 ###
 
-from dependency_injector.wiring import inject, Provide
+from dependency_injector.wiring import Provide, inject
 from fastapi import Depends
 
 from app.internal.pkg.jwt.jwt_handler import get_token_from_cookie

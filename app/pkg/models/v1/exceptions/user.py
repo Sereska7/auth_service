@@ -8,7 +8,8 @@ __all__ = [
     "UserNotFound",
     "UserReadError",
     "UserCreateError",
-    "UserUpdateError"
+    "UserUpdateError",
+    "UserAlreadyExists",
 ]
 
 
@@ -38,3 +39,10 @@ class UserUpdateError(BaseAPIException):
 
     message = "Error updating user."
     status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+
+
+class UserAlreadyExists(BaseAPIException):
+    """Exception raised when a user with given unique data already exists."""
+
+    message = "User with this username already exists."
+    status_code = status.HTTP_409_CONFLICT

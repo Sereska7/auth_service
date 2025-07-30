@@ -1,8 +1,7 @@
 """Routes for Auth module."""
 
 from dependency_injector.wiring import Provide, inject
-from fastapi import APIRouter, Depends, status, Cookie, HTTPException
-from fastapi import Response
+from fastapi import APIRouter, Cookie, Depends, HTTPException, Response, status
 
 from app.internal.services import Services
 from app.internal.services.v1 import AuthService
@@ -19,15 +18,15 @@ router = APIRouter(prefix="/auth", tags=["Auth"], route_class=RequestIDRoute)
     description="""
     Description: Authenticates the user and issues access and refresh tokens.
     Usage: This endpoint logs in the user by validating credentials and setting token cookies.
-    """
+    """,
 )
 @inject
 async def login(
-    cmd: models.UserAuthCommand,
+    cmd: models.AuthCommand,
     response: Response,
     auth_service: AuthService = Depends(Provide[Services.v1.auth_service]),
 ) -> models.TokenResponse:
-    tokens =  await auth_service.authenticate_user(cmd)
+    tokens = await auth_service.authenticate_user(cmd)
 
     response.set_cookie(
         key="access_token",
@@ -35,7 +34,7 @@ async def login(
         httponly=True,
         max_age=3600,
         secure=True,
-        samesite="lax"
+        samesite="lax",
     )
 
     response.set_cookie(
@@ -44,7 +43,7 @@ async def login(
         httponly=True,
         max_age=14 * 24 * 3600,
         secure=True,
-        samesite="lax"
+        samesite="lax",
     )
 
     return tokens
@@ -57,7 +56,7 @@ async def login(
     description="""
     Description: Refreshes the access and refresh tokens using the refresh token cookie.
     Usage: Issues new tokens to the user if the provided refresh token is valid.
-    """
+    """,
 )
 @inject
 async def refresh_tokens(
@@ -77,7 +76,7 @@ async def refresh_tokens(
         httponly=True,
         max_age=3600,
         secure=True,
-        samesite="lax"
+        samesite="lax",
     )
     response.set_cookie(
         key="refresh_token",
@@ -85,7 +84,7 @@ async def refresh_tokens(
         httponly=True,
         max_age=14 * 24 * 3600,
         secure=True,
-        samesite="lax"
+        samesite="lax",
     )
 
     return tokens
@@ -97,12 +96,22 @@ async def refresh_tokens(
     description="""
     Description: Refreshes the access and refresh tokens using the refresh token cookie.
     Usage: Issues new tokens to the user if the provided refresh token is valid.
-    """
+    """,
 )
 @inject
 async def logout(
     response: Response,
-
 ) -> dict:
-    response.delete_cookie(key="access_token", httponly=True, secure=True, samesite="lax")
+    response.delete_cookie(
+        key="access_token",
+        httponly=True,
+        secure=True,
+        samesite="lax",
+    )
+    response.delete_cookie(
+        key="refresh_token",
+        httponly=True,
+        secure=True,
+        samesite="lax",
+    )
     return {"msg": "Successfully logged out"}

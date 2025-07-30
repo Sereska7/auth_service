@@ -12,6 +12,7 @@ from app.pkg.models.base.optional_field import create_optional_fields_class
 from app.pkg.models.types import EncryptedSecretBytes
 
 __all__ = [
+    "UserFields",
     "User",
     "ServiceRoleEnum",
     "UserResponse",
@@ -19,9 +20,10 @@ __all__ = [
     "UserCreateCommand",
     "UserReadByIDCommand",
     "UserReadByEmailCommand",
-    "UserAuthCommand",
     "UserChangePasswordCommand",
-    "UserPasswordUpdateCommand"
+    "UserPasswordUpdateCommand",
+    "UserChangeDataCommand",
+    "UserUpdateDataCommand",
 ]
 
 
@@ -47,8 +49,12 @@ class UserFields:
         description="Email address of the user.",
         examples=["lolekeektop1@mail.ru", "user@example.com"],
     )
-    user_username: EncryptedSecretBytes = Field(
-        description="Unique username of the user.",
+    user_name: str = Field(
+        description="Unique user_name of the user.",
+        examples=["lolekeektop1", "john_doe"],
+    )
+    new_user_name: str = Field(
+        description="New unique user_name of the user.",
         examples=["lolekeektop1", "john_doe"],
     )
     user_password: str = Field(
@@ -99,7 +105,7 @@ class User(BaseUser):
 
     user_id: UUID = UserFields.user_id
     user_email: EmailStr = UserFields.user_email
-    user_username: str = UserFields.user_username
+    user_name: str = UserFields.user_name
     hashed_password: EncryptedSecretBytes = UserFields.hashed_password
     user_is_active: bool = UserFields.user_is_active
     user_is_verified: bool = UserFields.user_is_verified
@@ -113,7 +119,7 @@ class UserResponse(BaseUser):
 
     user_id: UUID = UserFields.user_id
     user_email: EmailStr = UserFields.user_email
-    user_username: str = UserFields.user_username
+    user_name: str = UserFields.user_name
     user_is_active: bool = UserFields.user_is_active
     user_is_verified: bool = UserFields.user_is_verified
     user_service_role: ServiceRoleEnum = UserFields.user_service_role
@@ -126,7 +132,7 @@ class UserRegisterCommand(BaseUser):
     """Command model for register new user."""
 
     user_email: EmailStr = UserFields.user_email
-    user_username: str = UserFields.user_username
+    user_name: str = UserFields.user_name
     user_password: str = UserFields.user_password
 
 
@@ -134,40 +140,47 @@ class UserCreateCommand(BaseUser):
     """Command model for creating new user."""
 
     user_email: EmailStr = UserFields.user_email
-    user_username: str = UserFields.user_username
+    user_name: str = UserFields.user_name
     hashed_password: str = UserFields.hashed_password
 
 
 class UserReadByIDCommand(BaseUser):
-    """"""
+    """Command model for reading a user by their ID."""
 
     user_id: UUID = UserFields.user_id
 
 
-class UserAuthCommand(BaseUser):
-    """"""
-
-    user_email: EmailStr = UserFields.user_email
-    user_password: EncryptedSecretBytes = UserFields.user_password
-
-
 class UserReadByEmailCommand(BaseUser):
-    """"""
+    """Command model for reading a user by their email."""
 
     user_email: EmailStr = UserFields.user_email
 
 
 class UserChangePasswordCommand(BaseUser):
-    """"""
+    """Command model for changing the user's password."""
 
     old_password: EncryptedSecretBytes = UserFields.old_password
     new_password: str = UserFields.new_password
 
 
 class UserPasswordUpdateCommand(BaseUser):
-    """"""
+    """Command model for updating the user's password."""
 
     user_id: UUID = UserFields.user_id
     hash_password: str = UserFields.hashed_password
 
-#Query
+
+class UserChangeDataCommand(BaseUser):
+    """"""
+
+    new_user_name: str = UserFields.user_name
+
+
+class UserUpdateDataCommand(BaseUser):
+    """Command model for updating user data."""
+
+    user_id: UUID = UserFields.user_id
+    new_user_name: str = UserFields.user_name
+
+
+# Query

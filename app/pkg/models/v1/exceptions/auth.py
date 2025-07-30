@@ -9,8 +9,9 @@ __all__ = [
     "UserInactive",
     "InvalidTokenPayload",
     "InvalidAuthCredentials",
-    "TokenPayloadMissingUserID"
+    "TokenPayloadMissingUserID",
 ]
+
 
 class InvalidCredentials(BaseAPIException):
     message = "Invalid email or password."

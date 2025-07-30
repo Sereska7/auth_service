@@ -2,8 +2,8 @@
 
 from dependency_injector import containers, providers
 
-from app.internal.repository.v1 import postgresql, rabbitmq, redis
 from app.internal.pkg import jwt
+from app.internal.repository.v1 import postgresql, rabbitmq, redis
 
 __all__ = ["Repositories"]
 

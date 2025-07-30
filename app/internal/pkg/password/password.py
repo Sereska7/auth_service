@@ -1,17 +1,14 @@
-"""Module for crypt and decrypt password"""
+"""Module for crypt and decrypt password."""
 
 import bcrypt
 
-__all__ = [
-    "crypt_password",
-    "check_password"
-]
+__all__ = ["crypt_password", "check_password"]
 
 from pydantic import SecretBytes
 
 
 def crypt_password(password: bytes) -> bytes:
-    """Crypt raw password
+    """Crypt raw password.
 
     Args:
         password: Raw password in bytes.
@@ -23,7 +20,7 @@ def crypt_password(password: bytes) -> bytes:
 
 
 def check_password(password: SecretBytes, hashed: SecretBytes) -> bool:
-    """Check equality of encrypted and raw password
+    """Check equality of encrypted and raw password.
 
     Args:
         password: Raw password.

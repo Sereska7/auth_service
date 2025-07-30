@@ -2,20 +2,17 @@
 
 from datetime import datetime, timedelta, timezone
 from logging import Logger
-from fastapi import Request
 
+from fastapi import HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
-from fastapi import HTTPException, status
 
 from app.internal.repository.v1.postgresql import UserRepository
 from app.pkg.logger import get_logger
 from app.pkg.settings import settings
 
-oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl="/auth/login",
-    auto_error=False
-)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login", auto_error=False)
+
 
 async def get_token_from_cookie(request: Request) -> str:
     token = request.cookies.get("access_token")
@@ -27,6 +24,7 @@ async def get_token_from_cookie(request: Request) -> str:
         )
     return token
 
+
 class JWTHandler:
     """"""
 
@@ -34,7 +32,12 @@ class JWTHandler:
     __logger: Logger = get_logger(__name__)
 
     @staticmethod
-    def _create_token(data: dict, expires_delta: timedelta, secret_key: str, algorithm: str) -> str:
+    def _create_token(
+        data: dict,
+        expires_delta: timedelta,
+        secret_key: str,
+        algorithm: str,
+    ) -> str:
         to_encode = data.copy()
         expire = datetime.now(timezone.utc) + expires_delta
         to_encode.update({"exp": expire})
@@ -44,18 +47,20 @@ class JWTHandler:
     def create_access_token(data: dict, expires_delta: timedelta = None) -> str:
         return JWTHandler._create_token(
             data=data,
-            expires_delta=expires_delta or timedelta(minutes=settings.JWT.ACCESS_TOKEN_EXPIRE_MINUTES),
+            expires_delta=expires_delta
+            or timedelta(minutes=settings.JWT.ACCESS_TOKEN_EXPIRE_MINUTES),
             secret_key=settings.JWT.SECRET_KEY.get_secret_value(),
-            algorithm=settings.JWT.ALGORITHM
+            algorithm=settings.JWT.ALGORITHM,
         )
 
     @staticmethod
     def create_refresh_token(data: dict, expires_delta: timedelta = None) -> str:
         return JWTHandler._create_token(
             data=data,
-            expires_delta=expires_delta or timedelta(days=settings.JWT.REFRESH_TOKEN_EXPIRE_DAYS),
+            expires_delta=expires_delta
+            or timedelta(days=settings.JWT.REFRESH_TOKEN_EXPIRE_DAYS),
             secret_key=settings.JWT.REFRESH_SECRET_KEY.get_secret_value(),
-            algorithm=settings.JWT.ALGORITHM
+            algorithm=settings.JWT.ALGORITHM,
         )
 
     @staticmethod
@@ -64,7 +69,7 @@ class JWTHandler:
             payload = jwt.decode(
                 token,
                 settings.JWT.SECRET_KEY.get_secret_value(),
-                algorithms=[settings.JWT.ALGORITHM]
+                algorithms=[settings.JWT.ALGORITHM],
             )
             return payload
         except JWTError:

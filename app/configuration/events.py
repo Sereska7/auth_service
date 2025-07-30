@@ -3,7 +3,6 @@
 import asyncio
 from contextlib import asynccontextmanager
 
-from dependency_injector.wiring import inject
 from fastapi import FastAPI
 
 

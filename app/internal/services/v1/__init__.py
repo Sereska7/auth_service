@@ -3,7 +3,7 @@
 from dependency_injector import containers, providers
 
 from app.internal.repository import Repositories
-from app.internal.repository.v1 import postgresql, rabbitmq, redis, jwt
+from app.internal.repository.v1 import jwt, postgresql, rabbitmq, redis
 from app.internal.services.v1.auth import AuthService
 from app.internal.services.v1.user import UserService
 from app.pkg.clients import Clients
@@ -41,5 +41,5 @@ class Services(containers.DeclarativeContainer):
     auth_service = providers.Factory(AuthService)
     auth_service.add_attributes(
         user_repository=postgres_repositories.user_repository,
-        jwt_handler=jwt_repositories.jwt_repository
+        jwt_handler=jwt_repositories.jwt_repository,
     )

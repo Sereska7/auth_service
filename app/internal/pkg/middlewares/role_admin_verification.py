@@ -10,8 +10,8 @@ from app.internal.services import Services
 from app.internal.services.v1.user import UserService
 from app.pkg.logger import get_logger
 from app.pkg.models import v1 as models
-from app.pkg.models.v1.exceptions.base import NotFoundError, ForbiddenError
-from app.pkg.models.v1.exceptions.repository import EmptyResult, DriverError
+from app.pkg.models.v1.exceptions.base import ForbiddenError, NotFoundError
+from app.pkg.models.v1.exceptions.repository import DriverError, EmptyResult
 from app.pkg.models.v1.exceptions.token_verification import InvalidCredentials
 from app.pkg.settings import settings
 
@@ -28,10 +28,12 @@ async def user_role_verification(
 ) -> None:
     if user_id is not None:
         try:
-            user: models.UserResponse = await user_service.user_repository.get_user_by_id(
-                cmd=models.UserReadByIDCommand(
-                    user_id=UUID(user_id),
-                ),
+            user: models.UserResponse = (
+                await user_service.user_repository.get_user_by_id(
+                    cmd=models.UserReadByIDCommand(
+                        user_id=UUID(user_id),
+                    ),
+                )
             )
         except EmptyResult:
             raise NotFoundError

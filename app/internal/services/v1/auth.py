@@ -1,6 +1,7 @@
 """Models for Auth object."""
 
 from logging import Logger
+
 from jose import jwt
 
 from app.internal.pkg.jwt.jwt_handler import JWTHandler
@@ -8,10 +9,15 @@ from app.internal.pkg.password.password import check_password
 from app.internal.repository.v1.postgresql.user import UserRepository
 from app.pkg.logger import get_logger
 from app.pkg.models import v1 as models
-from app.pkg.models.v1.exceptions.auth import UserInactive, InvalidCredentials, InvalidTokenPayload, \
-    InvalidAuthCredentials, TokenPayloadMissingUserID
+from app.pkg.models.v1.exceptions.auth import (
+    InvalidAuthCredentials,
+    InvalidCredentials,
+    InvalidTokenPayload,
+    TokenPayloadMissingUserID,
+    UserInactive,
+)
 from app.pkg.models.v1.exceptions.repository import DriverError, EmptyResult
-from app.pkg.models.v1.exceptions.user import UserReadError, UserNotFound
+from app.pkg.models.v1.exceptions.user import UserNotFound, UserReadError
 from app.pkg.settings import settings
 
 __all__ = ["AuthService"]
@@ -24,15 +30,12 @@ class AuthService:
     jwt_handler: JWTHandler
     __logger: Logger = get_logger(__name__)
 
-    async def authenticate_user(
-        self,
-        cmd: models.UserAuthCommand
-    ) -> models.TokenResponse:
-        """
-        Authenticates a user using email and password, then returns access and refresh tokens.
+    async def authenticate_user(self, cmd: models.AuthCommand) -> models.TokenResponse:
+        """Authenticates a user using email and password, then returns access
+        and refresh tokens.
 
         Args:
-            cmd (models.UserAuthCommand): Command object containing user credentials (email and password).
+            cmd (models.AuthCommand): Command object containing user credentials (email and password).
 
         Returns:
             models.TokenResponse: Contains access token, refresh token, and token type.
@@ -49,18 +52,21 @@ class AuthService:
         if not user.user_is_active:
             raise UserInactive
 
-        access_token = self.jwt_handler.create_access_token({"user_id": str(user.user_id)})
-        refresh_token = self.jwt_handler.create_refresh_token({"user_id": str(user.user_id)})
+        access_token = self.jwt_handler.create_access_token(
+            {"user_id": str(user.user_id)},
+        )
+        refresh_token = self.jwt_handler.create_refresh_token(
+            {"user_id": str(user.user_id)},
+        )
 
         return models.TokenResponse(
             access_token=access_token,
             refresh_token=refresh_token,
-            token_type="bearer"
+            token_type="bearer",
         )
 
     async def refresh_access_token(self, refresh_token: str) -> models.TokenResponse:
-        """
-        Refreshes the access token using a valid refresh token.
+        """Refreshes the access token using a valid refresh token.
 
         Args:
             refresh_token (str): The refresh token string provided by the client.
@@ -79,7 +85,7 @@ class AuthService:
             raise InvalidTokenPayload
 
         user = await self.user_repository.get_user_by_id(
-            cmd=models.UserReadByIDCommand(user_id=user_id)
+            cmd=models.UserReadByIDCommand(user_id=user_id),
         )
         if not user or not user.user_is_active:
             raise UserNotFound
@@ -87,15 +93,14 @@ class AuthService:
         access_token = self.jwt_handler.create_access_token({"user_id": str(user_id)})
         refresh_token = self.jwt_handler.create_refresh_token({"user_id": str(user_id)})
 
-        return models.TokenResponse(access_token=access_token, refresh_token=refresh_token, token_type="bearer")
+        return models.TokenResponse(
+            access_token=access_token,
+            refresh_token=refresh_token,
+            token_type="bearer",
+        )
 
-
-    async def get_current_user(
-        self,
-        token: str
-    ) -> models.User:
-        """
-        Retrieves the current user based on the provided access token.
+    async def get_current_user(self, token: str) -> models.User:
+        """Retrieves the current user based on the provided access token.
 
         Args:
             token (str): The JWT access token.
@@ -114,7 +119,7 @@ class AuthService:
 
         try:
             user = await self.user_repository.get_full_user_by_id(
-                cmd=models.UserReadByIDCommand(user_id=user_id)
+                cmd=models.UserReadByIDCommand(user_id=user_id),
             )
             return user
         except DriverError as exc:

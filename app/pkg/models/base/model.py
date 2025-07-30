@@ -27,7 +27,7 @@ class BaseModel(pydantic.BaseModel):
         validate_assignment=True,
         str_strip_whitespace=True,
         coerce_numbers_to_str=True,
-        from_attributes=True
+        from_attributes=True,
     )
 
     def to_dict(

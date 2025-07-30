@@ -1,18 +1,28 @@
 """Models for User object."""
 
 from logging import Logger
+from uuid import UUID
+
 from passlib.handlers.bcrypt import bcrypt
 
-from app.internal.repository.v1.postgresql.user import UserRepository
 from app.internal.pkg.password.password import check_password
+from app.internal.repository.v1.postgresql.user import UserRepository
 from app.pkg.logger import get_logger
 from app.pkg.models import v1 as models
 from app.pkg.models.v1.exceptions.auth import InvalidCredentials
-from app.pkg.models.v1.exceptions.repository import DriverError, EmptyResult
+from app.pkg.models.v1.exceptions.repository import (
+    DriverError,
+    EmptyResult,
+    UniqueViolation,
+)
+from app.pkg.models.v1.exceptions.user import (
+    UserAlreadyExists,
+    UserCreateError,
+    UserNotFound,
+    UserUpdateError,
+)
 
 __all__ = ["UserService"]
-
-from app.pkg.models.v1.exceptions.user import UserCreateError, UserNotFound, UserUpdateError
 
 
 class UserService:
@@ -25,8 +35,7 @@ class UserService:
         self,
         cmd: models.UserRegisterCommand,
     ) -> models.UserResponse:
-        """
-        Registers a new user in the system.
+        """Registers a new user in the system.
 
         Args:
             cmd (models.UserRegisterCommand): Command object containing user registration data.
@@ -42,21 +51,21 @@ class UserService:
                     model=models.UserCreateCommand,
                     extra_fields={
                         "hashed_password": hashed_password,
-                    }
-                )
+                    },
+                ),
             )
             return user
+        except UniqueViolation:
+            raise UserAlreadyExists
         except DriverError as exc:
-            raise UserCreateError
-
+            raise UserCreateError from exc
 
     async def change_password(
         self,
         user: models.User,
-        cmd: models.UserChangePasswordCommand
+        cmd: models.UserChangePasswordCommand,
     ) -> models.UserResponse:
-        """
-        Changes the password of the authenticated user.
+        """Changes the password of the authenticated user.
 
         Args:
             user (models.User): The currently authenticated user.
@@ -72,13 +81,54 @@ class UserService:
         new_hashed_password = bcrypt.hash(cmd.new_password)
         try:
             user = await self.user_repository.update_password(
-                cmd= models.UserPasswordUpdateCommand(
+                cmd=models.UserPasswordUpdateCommand(
                     user_id=user.user_id,
-                    hash_password=new_hashed_password
-                )
+                    hash_password=new_hashed_password,
+                ),
             )
             return user
         except EmptyResult:
             raise UserNotFound
         except DriverError as exc:
-            raise UserUpdateError
+            raise UserUpdateError from exc
+
+    async def change_data(
+        self,
+        cmd: models.UserUpdateDataCommand,
+    ) -> models.UserResponse:
+        """Updates user data with the provided information.
+
+        Args:
+            cmd (models.UserUpdateDataCommand): Command containing new user data to update.
+
+        Returns:
+            models.UserResponse: The updated user data.
+        """
+        try:
+            return await self.user_repository.update_data(cmd)
+        except EmptyResult:
+            raise UserNotFound
+        except UniqueViolation:
+            raise UserAlreadyExists
+        except DriverError as exc:
+            raise UserUpdateError from exc
+
+    async def set_user_verified(
+        self,
+        user_id: UUID
+    ) -> None:
+        """Marks the user as verified by updating the verification status.
+
+        Args:
+            user_id (UUID): Unique identifier of the user to be verified.
+
+        Returns:
+            None
+        """
+
+        try:
+            await self.user_repository.update_verified(user_id)
+        except EmptyResult:
+            raise UserNotFound
+        except DriverError as exc:
+            raise UserUpdateError from exc

@@ -2,6 +2,7 @@
 
 import json
 from typing import Any
+
 import aio_pika
 
 from app.internal.repository.v1.rabbitmq.connection import get_connection
