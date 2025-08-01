@@ -114,42 +114,6 @@ class Postgresql(_Settings):
         return data
 
 
-class RabbitMQ(_Settings):
-    """RabbitMQ settings."""
-
-    #: str: Resource host.
-    HOST: str = "localhost"
-    #: PositiveInt: positive int (x > 0) port of Resource.
-    PORT: PositiveInt = 5672
-    #: str: Resource user.
-    USER: str = "user"
-    #: SecretStr: Resource password.
-    PASSWORD: SecretStr = "secret"
-    #: Connection DSN schema
-    SCHEMA: str = "amqp"
-
-    MAIL_KEY: str
-    TELEGRAM_KEY: str
-
-    #: str: Concatenation all settings for Resource in one string. (DSN)
-    #  Builds in `root_validator` method.
-    DSN: str | None = None
-
-    @model_validator(mode="before")
-    @classmethod
-    def build_dsn(cls, values: dict) -> dict:  # noqa: A003
-        values["DSN"] = str(
-            AmqpDsn.build(
-                scheme="amqp",
-                username=values["USER"],
-                password=urllib.parse.quote_plus(values["PASSWORD"]),
-                host=values["HOST"],
-                port=int(values["PORT"]),
-            ),
-        )
-        return values
-
-
 class Redis(_Settings):
     """Redis settings."""
 
@@ -253,9 +217,6 @@ class Settings(_Settings):
 
     #: Postgresql: Postgresql settings.
     POSTGRES: Postgresql
-
-    #: Rabbit
-    RABBITMQ: RabbitMQ
 
     #: Redis
     REDIS: Redis

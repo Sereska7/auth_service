@@ -3,7 +3,7 @@
 from dependency_injector import containers, providers
 
 from app.internal.repository import Repositories
-from app.internal.repository.v1 import jwt, postgresql, rabbitmq, redis
+from app.internal.repository.v1 import jwt, postgresql, redis
 from app.internal.services.v1.auth import AuthService
 from app.internal.services.v1.user import UserService
 from app.pkg.clients import Clients
@@ -16,9 +16,6 @@ class Services(containers.DeclarativeContainer):
     configuration = providers.Configuration(name="settings")
     configuration.from_dict(settings.model_dump())
 
-    rabbitmq_repositories: rabbitmq.Repositories = providers.Container(
-        Repositories.v1.rabbitmq,
-    )  # type: ignore
     redis_repositories: redis.RedisRepositories = providers.Container(
         Repositories.v1.redis,
     )  # type: ignore

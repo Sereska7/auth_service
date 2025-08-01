@@ -1,0 +1,54 @@
+services:
+  api:
+    container_name: ${API__HOST}
+    restart: unless-stopped
+    build:
+      context: ./
+      dockerfile: ./docker/app/Dockerfile
+    env_file:
+      - .env
+    ports:
+      - 127.0.0.1:${API__EXT_PORT}:5000
+    depends_on:
+      - postgres
+      - redis
+      - migrations
+    command: [ "uvicorn", "app:create_app", "--host", "0.0.0.0", "--port", "5000" ]
+
+  postgres:
+    image: postgres:15
+    container_name: auth_service_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES__DATABASE_NAME}
+      POSTGRES_USER: ${POSTGRES__USER}
+      POSTGRES_PASSWORD: ${POSTGRES__PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    container_name: auth_service_redis
+    restart: unless-stopped
+    command: redis-server --requirepass ${REDIS__PASSWORD}
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  migrations:
+    container_name: auth_service_migrations
+    build:
+      context: .
+      dockerfile: docker/migrations/Dockerfile
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+    command: bash -c "poetry run python -m scripts.migrate && poetry run python -m scripts.migrate --testing"
+
+volumes:
+  postgres_data:
+  redis_data:
