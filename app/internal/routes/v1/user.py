@@ -1,5 +1,4 @@
 """Routes for User module."""
-from uuid import UUID
 
 from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends, status, Query
@@ -72,9 +71,9 @@ async def change_data(
     )
 
 
-@router.patch(
+@router.get(
     "/verify",
-    status_code=status.HTTP_200_OK,
+    status_code=status.HTTP_202_ACCEPTED,
     description="""
     Description: Confirms user verification status by user ID.  
     Used: Called by external services to mark the user as verified after successful confirmation.
@@ -82,7 +81,7 @@ async def change_data(
 )
 @inject
 async def verify_user(
-    user_id: UUID = Query(..., description="User ID for confirmation"),
+    token: str = Query(..., description="Verification token from email link"),
     user_service: UserService = Depends(Provide[Services.v1.user_service])
 ):
-    await user_service.set_user_verified(user_id)
+    await user_service.verify_user(token)

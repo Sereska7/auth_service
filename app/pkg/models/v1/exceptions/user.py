@@ -10,6 +10,7 @@ __all__ = [
     "UserCreateError",
     "UserUpdateError",
     "UserAlreadyExists",
+    "TokenNotFoundError"
 ]
 
 
@@ -46,3 +47,10 @@ class UserAlreadyExists(BaseAPIException):
 
     message = "User with this username already exists."
     status_code = status.HTTP_409_CONFLICT
+
+
+class TokenNotFoundError(BaseAPIException):
+    """Verifies the email token by checking Redis cache."""
+
+    message = "Token not found."
+    status_code = status.HTTP_404_NOT_FOUND

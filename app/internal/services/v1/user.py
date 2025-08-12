@@ -1,12 +1,13 @@
 """Models for User object."""
 
 from logging import Logger
-from uuid import UUID
 
 from passlib.handlers.bcrypt import bcrypt
 
+from app.internal.pkg.middlewares.verification_email import VerifyEmail
 from app.internal.pkg.password.password import check_password
 from app.internal.repository.v1.postgresql.user import UserRepository
+from app.pkg.clients.v1.notification_service import NotificationServiceClient
 from app.pkg.logger import get_logger
 from app.pkg.models import v1 as models
 from app.pkg.models.v1.exceptions.auth import InvalidCredentials
@@ -29,6 +30,8 @@ class UserService:
     """User service class."""
 
     user_repository: UserRepository
+    verify_email: VerifyEmail
+    notification_service_client: NotificationServiceClient
     __logger: Logger = get_logger(__name__)
 
     async def register_user(
@@ -52,6 +55,13 @@ class UserService:
                     extra_fields={
                         "hashed_password": hashed_password,
                     },
+                ),
+            )
+            link = await self.verify_email.generate_verification_link(user.user_id)
+            await self.notification_service_client.send_email_notification(
+                query=models.SendDateNotificationQuery(
+                    user_email=user.email,
+                    verify_link=link
                 ),
             )
             return user
@@ -113,20 +123,23 @@ class UserService:
         except DriverError as exc:
             raise UserUpdateError from exc
 
-    async def set_user_verified(
+    async def verify_user(
         self,
-        user_id: UUID
+        token: str
     ) -> None:
-        """Marks the user as verified by updating the verification status.
+        """Verifies the user based on the provided verification token.
 
         Args:
-            user_id (UUID): Unique identifier of the user to be verified.
+            token (str): Verification token received from the email link.
 
         Returns:
             None
         """
 
         try:
+            user_id = await self.verify_email.verify_token(token)
+            if user_id is None:
+                raise UserUpdateError
             await self.user_repository.update_verified(user_id)
         except EmptyResult:
             raise UserNotFound

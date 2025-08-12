@@ -6,7 +6,7 @@ from functools import lru_cache
 from typing import Literal
 
 from dotenv import find_dotenv
-from pydantic import AmqpDsn, PostgresDsn, RedisDsn, model_validator
+from pydantic import PostgresDsn, RedisDsn, model_validator, AnyUrl
 from pydantic.types import PositiveInt, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -165,6 +165,8 @@ class APIServer(_Settings):
     #: str: API host.
     HOST: str = "localhost"
 
+    PORT: int = 8000
+
     # --- SECURITY SETTINGS ---
     #: SecretStr: Secret key for token auth.
     X_API_TOKEN: SecretStr = SecretStr("secret")
@@ -198,8 +200,17 @@ class JWTSettings(_Settings):
     AUDIENCE: str | None = None
 
 
+class Client(_Settings):
+    """Client settings."""
+
+    X_API_TOKEN: SecretStr = None
+    API_URL: AnyUrl
+
+
 class Clients(_Settings):
-    pass
+    """Clients settings."""
+
+    NOTIFICATION_SERVICE: Client
 
 
 class Settings(_Settings):
@@ -222,7 +233,7 @@ class Settings(_Settings):
     REDIS: Redis
 
     #: Clients
-    CLIENTS: Clients | None = None
+    CLIENTS: Clients
 
 
 @lru_cache

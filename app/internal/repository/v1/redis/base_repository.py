@@ -27,11 +27,16 @@ class BaseRedisRepository(ABC):
             if expire_time:
                 await connect.expire(redis_key, expire_time)
 
-    @collect_response
+    @staticmethod
     async def read(
-        self,
         redis_key: str,
-        result_model: Type[BaseModel],  # pylint: disable=unused-argument
-    ) -> Type[BaseModel]:
+    ):
         async with get_connection() as connect:
             return await connect.get(redis_key)
+
+    @staticmethod
+    async def delete(
+        redis_key: str,
+    ):
+        async with get_connection() as connect:
+            return await connect.delete(redis_key)

@@ -24,6 +24,7 @@ __all__ = [
     "UserPasswordUpdateCommand",
     "UserChangeDataCommand",
     "UserUpdateDataCommand",
+    "SendDateNotificationQuery"
 ]
 
 
@@ -94,6 +95,10 @@ class UserFields:
     new_password: str = Field(
         description="Nwe password of the user.",
         examples=["password"],
+    )
+    verify_link: str = Field(
+        description="Verification link of the user.",
+        examples=["<KEY>"],
     )
 
 
@@ -184,3 +189,8 @@ class UserUpdateDataCommand(BaseUser):
 
 
 # Query
+class SendDateNotificationQuery(BaseUser):
+    """Query model for sending a notification with user's email and verification token."""
+
+    user_email: EmailStr = UserFields.user_email
+    verify_link: str = UserFields.verify_link

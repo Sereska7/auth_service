@@ -33,14 +33,12 @@ def create_app() -> FastAPI:
     """
     if not settings.API.DEBUG_MODE:
         fastapi_kwargs = {
-            "dependencies": [Depends(token_based_verification)],
             "docs_url": None,
             "redoc_url": None,
             "openapi_url": None,
         }
     else:
         fastapi_kwargs = {
-            "dependencies": [Depends(token_based_verification)],
             "root_path": "/root_path",
         }
     app = FastAPI(lifespan=lifespan, **fastapi_kwargs)
