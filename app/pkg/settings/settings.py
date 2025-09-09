@@ -6,7 +6,7 @@ from functools import lru_cache
 from typing import Literal
 
 from dotenv import find_dotenv
-from pydantic import PostgresDsn, RedisDsn, model_validator, AnyUrl
+from pydantic import PostgresDsn, RedisDsn, model_validator, AmqpDsn
 from pydantic.types import PositiveInt, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -114,6 +114,41 @@ class Postgresql(_Settings):
         return data
 
 
+class RabbitMQ(_Settings):
+    """RabbitMQ settings."""
+
+    #: str: Resource host.
+    HOST: str = "localhost"
+    #: PositiveInt: positive int (x > 0) port of Resource.
+    PORT: PositiveInt = 5672
+    #: str: Resource user.
+    USER: str = "user"
+    #: SecretStr: Resource password.
+    PASSWORD: SecretStr = "secret"
+    #: Connection DSN schema
+    SCHEMA: str = "amqp"
+
+    NOTIFICATION_KEY: str
+
+    #: str: Concatenation all settings for Resource in one string. (DSN)
+    #  Builds in `root_validator` method.
+    DSN: str | None = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def build_dsn(cls, values: dict) -> dict:  # noqa: A003
+        values["DSN"] = str(
+            AmqpDsn.build(
+                scheme="amqp",
+                username=values["USER"],
+                password=urllib.parse.quote_plus(values["PASSWORD"]),
+                host=values["HOST"],
+                port=int(values["PORT"]),
+            ),
+        )
+        return values
+
+
 class Redis(_Settings):
     """Redis settings."""
 
@@ -200,19 +235,6 @@ class JWTSettings(_Settings):
     AUDIENCE: str | None = None
 
 
-class Client(_Settings):
-    """Client settings."""
-
-    X_API_TOKEN: SecretStr = None
-    API_URL: AnyUrl
-
-
-class Clients(_Settings):
-    """Clients settings."""
-
-    NOTIFICATION_SERVICE: Client
-
-
 class Settings(_Settings):
     """Server settings.
 
@@ -232,8 +254,8 @@ class Settings(_Settings):
     #: Redis
     REDIS: Redis
 
-    #: Clients
-    CLIENTS: Clients
+    #: RabbitMQ
+    RABBITMQ: RabbitMQ
 
 
 @lru_cache

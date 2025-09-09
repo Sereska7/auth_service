@@ -1,14 +1,12 @@
 """User repository for PostgresSQL database."""
 
 from abc import ABC
-from typing import Type, TypeVar
+from typing import TypeVar
 
 from app.internal.repository.v1.redis.connection import get_connection
-from app.internal.repository.v1.redis.handlers.collect_response import collect_response
+
 
 __all__ = ["BaseRedisRepository"]
-
-from app.pkg.models.base import BaseModel
 
 BaseRepository = TypeVar("BaseRepository", bound="BaseRedisRepository")
 

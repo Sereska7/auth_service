@@ -1,7 +1,7 @@
 """Routes for User module."""
 
 from dependency_injector.wiring import Provide, inject
-from fastapi import APIRouter, Depends, status, Query
+from fastapi import APIRouter, Depends, status
 
 from app.internal.pkg.dependencies import get_current_user_from_auth
 from app.internal.services import Services
@@ -69,19 +69,3 @@ async def change_data(
             extra_fields={"user_id": current_user.user_id},
         ),
     )
-
-
-@router.get(
-    "/verify",
-    status_code=status.HTTP_202_ACCEPTED,
-    description="""
-    Description: Confirms user verification status by user ID.  
-    Used: Called by external services to mark the user as verified after successful confirmation.
-    """
-)
-@inject
-async def verify_user(
-    token: str = Query(..., description="Verification token from email link"),
-    user_service: UserService = Depends(Provide[Services.v1.user_service])
-):
-    await user_service.verify_user(token)

@@ -41,7 +41,12 @@ class AuthService:
             models.TokenResponse: Contains access token, refresh token, and token type.
         """
 
-        user = await self.user_repository.get_user_by_email(cmd)
+        try:
+            user = await self.user_repository.get_user_by_email(cmd)
+        except EmptyResult:
+            raise UserNotFound
+        except DriverError as exc:
+            raise UserReadError from exc
 
         if not user:
             raise InvalidCredentials

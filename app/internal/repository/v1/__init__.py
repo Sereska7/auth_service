@@ -3,7 +3,7 @@
 from dependency_injector import containers, providers
 
 from app.internal.pkg import jwt
-from app.internal.repository.v1 import postgresql, redis
+from app.internal.repository.v1 import postgresql, rabbitmq, redis
 
 __all__ = ["Repositories"]
 
@@ -20,5 +20,6 @@ class Repositories(containers.DeclarativeContainer):
     """
 
     postgres = providers.Container(postgresql.Repositories)
+    rabbitmq = providers.Container(rabbitmq.Repositories)
     redis = providers.Container(redis.RedisRepositories)
     jwt = providers.Container(jwt.Repositories)

@@ -1,13 +1,15 @@
 """Models for User object."""
-
+import json
+from datetime import datetime, timezone
 from logging import Logger
+from uuid import uuid4
 
 from passlib.handlers.bcrypt import bcrypt
 
-from app.internal.pkg.middlewares.verification_email import VerifyEmail
 from app.internal.pkg.password.password import check_password
+from app.internal.pkg.verification.verification import create_verification_code
 from app.internal.repository.v1.postgresql.user import UserRepository
-from app.pkg.clients.v1.notification_service import NotificationServiceClient
+from app.internal.repository.v1 import redis, rabbitmq
 from app.pkg.logger import get_logger
 from app.pkg.models import v1 as models
 from app.pkg.models.v1.exceptions.auth import InvalidCredentials
@@ -22,16 +24,18 @@ from app.pkg.models.v1.exceptions.user import (
     UserNotFound,
     UserUpdateError,
 )
+from app.pkg.settings import settings
 
 __all__ = ["UserService"]
+
 
 
 class UserService:
     """User service class."""
 
     user_repository: UserRepository
-    verify_email: VerifyEmail
-    notification_service_client: NotificationServiceClient
+    redis_repository: redis.BaseRedisRepository
+    rabbitmq_repository: rabbitmq.RabbitMQRepository
     __logger: Logger = get_logger(__name__)
 
     async def register_user(
@@ -57,18 +61,38 @@ class UserService:
                     },
                 ),
             )
-            link = await self.verify_email.generate_verification_link(user.user_id)
-            await self.notification_service_client.send_email_notification(
-                query=models.SendDateNotificationQuery(
-                    user_email=user.email,
-                    verify_link=link
+            verification_code = await create_verification_code()
+            verification_id = uuid4()
+            redis_key = f"verify:{verification_id}"
+            redis_value = json.dumps(
+                {
+                    "user_id": str(user.user_id),
+                    "hash_verification_code": verification_code,
+                }
+            )
+            await self.redis_repository.create(
+                redis_key=redis_key,
+                redis_value=redis_value,
+                expire_time=300
+            )
+            await self.rabbitmq_repository.create(
+                message=models.UserVerifiedEvent(
+                    event="user.verification.requested",
+                    event_id=uuid4(),
+                    occurred_at=datetime.now(timezone.utc),
+                    verification_id=verification_id,
+                    user_id=user.user_id,
+                    email=user.user_email,
+                    code=verification_code,
                 ),
+                routing_key=settings.RABBITMQ.NOTIFICATION_KEY,
             )
             return user
         except UniqueViolation:
             raise UserAlreadyExists
         except DriverError as exc:
             raise UserCreateError from exc
+
 
     async def change_password(
         self,
@@ -120,28 +144,5 @@ class UserService:
             raise UserNotFound
         except UniqueViolation:
             raise UserAlreadyExists
-        except DriverError as exc:
-            raise UserUpdateError from exc
-
-    async def verify_user(
-        self,
-        token: str
-    ) -> None:
-        """Verifies the user based on the provided verification token.
-
-        Args:
-            token (str): Verification token received from the email link.
-
-        Returns:
-            None
-        """
-
-        try:
-            user_id = await self.verify_email.verify_token(token)
-            if user_id is None:
-                raise UserUpdateError
-            await self.user_repository.update_verified(user_id)
-        except EmptyResult:
-            raise UserNotFound
         except DriverError as exc:
             raise UserUpdateError from exc

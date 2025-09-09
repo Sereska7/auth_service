@@ -24,7 +24,7 @@ services:
       POSTGRES_USER: ${POSTGRES__USER}
       POSTGRES_PASSWORD: ${POSTGRES__PASSWORD}
     ports:
-      - "5432:5432"
+      - "5001:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -37,6 +37,19 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: auth_service_rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ__USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ__PASSWORD}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
 
   migrations:
     container_name: auth_service_migrations
@@ -52,3 +65,4 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  rabbitmq_data:

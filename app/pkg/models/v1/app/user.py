@@ -15,6 +15,7 @@ __all__ = [
     "UserFields",
     "User",
     "ServiceRoleEnum",
+    "UserVerifiedEvent",
     "UserResponse",
     "UserRegisterCommand",
     "UserCreateCommand",
@@ -24,7 +25,6 @@ __all__ = [
     "UserPasswordUpdateCommand",
     "UserChangeDataCommand",
     "UserUpdateDataCommand",
-    "SendDateNotificationQuery"
 ]
 
 
@@ -93,12 +93,34 @@ class UserFields:
         examples=["password"],
     )
     new_password: str = Field(
-        description="Nwe password of the user.",
+        description="New password of the user.",
         examples=["password"],
     )
-    verify_link: str = Field(
-        description="Verification link of the user.",
-        examples=["<KEY>"],
+    event: str = Field(
+        default="user.verification.requested",
+        description="Type of the event. Always 'user.verification.requested'.",
+        examples=["user.verification.requested"],
+    )
+
+    event_id: UUID = Field(
+        description="Unique identifier of the event (UUID) used for idempotency.",
+        examples=["a8d39bb4-0c52-4c56-a21b-34ed4b3f1570"],
+    )
+
+    occurred_at: datetime = Field(
+        description="Timestamp (UTC) when the event was generated.",
+        examples=["2025-09-09T14:10:11.532000+00:00"],
+    )
+
+    verification_id: UUID = Field(
+        description="UUID of the verification record (key in Redis/DB).",
+        examples=["4f7f6f6d-91e7-43aa-bb2f-3dcfb6a2edc4"],
+    )
+    code: str = Field(
+        description="Six-digit verification code (or a magic link).",
+        examples=["582341"],
+        min_length=6,
+        max_length=6,
     )
 
 
@@ -117,6 +139,18 @@ class User(BaseUser):
     user_service_role: ServiceRoleEnum = UserFields.user_service_role
     user_create_at: datetime = UserFields.user_create_at
     user_update_at: datetime | None = UserFields.user_update_at
+
+
+class UserVerifiedEvent(BaseUser):
+    """"""
+
+    event: str = UserFields.event
+    event_id: UUID = UserFields.event_id
+    occurred_at: datetime = UserFields.occurred_at
+    verification_id: UUID = UserFields.verification_id
+    user_id: UUID = UserFields.user_id
+    email: EmailStr = UserFields.user_email
+    code: str = UserFields.code
 
 
 class UserResponse(BaseUser):
@@ -186,11 +220,3 @@ class UserUpdateDataCommand(BaseUser):
 
     user_id: UUID = UserFields.user_id
     new_user_name: str = UserFields.user_name
-
-
-# Query
-class SendDateNotificationQuery(BaseUser):
-    """Query model for sending a notification with user's email and verification token."""
-
-    user_email: EmailStr = UserFields.user_email
-    verify_link: str = UserFields.verify_link
