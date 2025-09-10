@@ -1,6 +1,4 @@
-"""
-Folder repository implementation.
-"""
+"""Folder repository implementation."""
 
 from uuid import UUID
 
@@ -18,21 +16,17 @@ __all__ = ["UserRepository"]
 
 
 class UserRepository(Repository):
-    """
-    User repository implementation.
-    """
+    """User repository implementation."""
 
     @collect_response
     async def create(self, cmd: models.UserCreateCommand) -> models.UserResponse:
-        """
-        Creates a new user record in the database.
+        """Creates a new user record in the database.
 
         Args:
             cmd (models.UserCreateCommand): Command object containing user creation data.
 
         Returns:
             models.UserResponse: The created user details.
-
         """
 
         async with get_connection() as session:
@@ -48,15 +42,13 @@ class UserRepository(Repository):
         self,
         cmd: models.UserPasswordUpdateCommand,
     ) -> models.UserResponse:
-        """
-        Updates the hashed password of a user.
+        """Updates the hashed password of a user.
 
         Args:
             cmd (models.UserPasswordUpdateCommand): Command object containing user ID and new hashed password.
 
         Returns:
             models.UserResponse: The updated user details.
-
         """
 
         async with get_connection() as session:
@@ -75,15 +67,13 @@ class UserRepository(Repository):
         self,
         cmd: models.UserReadByIDCommand,
     ) -> models.UserResponse:
-        """
-        Retrieves a user by their unique user ID.
+        """Retrieves a user by their unique user ID.
 
         Args:
             cmd (models.UserReadByIDCommand): Command object containing the user ID.
 
         Returns:
             models.UserResponse: The user data matching the given ID.
-
         """
 
         async with get_connection() as session:
@@ -96,15 +86,13 @@ class UserRepository(Repository):
 
     @collect_response
     async def get_full_user_by_id(self, cmd: models.UserReadByIDCommand) -> models.User:
-        """
-        Retrieves full user details by user ID.
+        """Retrieves full user details by user ID.
 
         Args:
             cmd (models.UserReadByIDCommand): Command object containing the user ID.
 
         Returns:
             models.User: The full user data corresponding to the given user ID.
-
         """
 
         async with get_connection() as session:
@@ -120,15 +108,13 @@ class UserRepository(Repository):
         self,
         cmd: models.UserReadByEmailCommand,
     ) -> models.User:
-        """
-        Retrieves user details by email.
+        """Retrieves user details by email.
 
         Args:
             cmd (models.UserReadByEmailCommand): Command object containing the user's email.
 
         Returns:
             models.User: The user data corresponding to the given email.
-
         """
 
         async with get_connection() as session:
@@ -146,19 +132,19 @@ class UserRepository(Repository):
         self,
         cmd: models.UserUpdateDataCommand,
     ) -> models.UserResponse:
-        """
-        Updates the user's data in the database.
+        """Updates the user's data in the database.
 
         Args:
             cmd (models.UserUpdateDataCommand): Command containing the user ID and new data (e.g., new username).
 
         Returns:
             models.UserResponse: The user object with updated data.
-
         """
         async with get_connection() as session:
             await session.execute(
-                update(User).where(User.user_id == cmd.user_id).values(user_name=cmd.new_user_name),
+                update(User)
+                .where(User.user_id == cmd.user_id)
+                .values(user_name=cmd.new_user_name),
             )
             await session.commit()
             updated_data = await session.get(User, cmd.user_id)
@@ -167,19 +153,19 @@ class UserRepository(Repository):
 
     @collect_response
     async def update_verified(self, user_id: UUID) -> models.UserResponse:
-        """
-        Sets the user's verification status to True in the database.
+        """Sets the user's verification status to True in the database.
 
         Args:
             user_id (UUID): Unique identifier of the user to be marked as verified.
 
         Returns:
             models.UserResponse: The updated user object with verification status.
-
         """
         async with get_connection() as session:
             await session.execute(
-                update(User).where(User.user_id == user_id).values(user_is_verified=True),
+                update(User)
+                .where(User.user_id == user_id)
+                .values(user_is_verified=True),
             )
             await session.commit()
             updated_data = await session.get(User, user_id)

@@ -10,8 +10,7 @@ from app.pkg.settings import settings
 
 
 def create_app() -> FastAPI:
-    """
-    Create ``FastAPI`` application.
+    """Create ``FastAPI`` application.
 
     :func:`.create_app` is a global point of your application.
     In :func:`.create_app` you can add all your middlewares, routes, dependencies, etc.
@@ -31,7 +30,6 @@ def create_app() -> FastAPI:
             ...     token_based_verification
             ... )
             >>> app = FastAPI(dependencies=[Depends(token_based_verification)])
-
     """
     if not settings.API.DEBUG_MODE:
         fastapi_kwargs = {

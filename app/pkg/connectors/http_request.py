@@ -1,6 +1,5 @@
-"""
-Request to API with HMAC encryption or X-ACCESS-TOKEN header authentication.
-"""
+"""Request to API with HMAC encryption or X-ACCESS-TOKEN header
+authentication."""
 
 import hashlib
 import hmac
@@ -19,9 +18,8 @@ __all__ = ["HttpRequests"]
 
 
 class HttpRequests:
-    """
-    Request to API with HMAC encryption or X-ACCESS-TOKEN header authentication.
-    """
+    """Request to API with HMAC encryption or X-ACCESS-TOKEN header
+    authentication."""
 
     client_name: str
     token: pydantic.SecretStr
@@ -40,11 +38,9 @@ class HttpRequests:
                 x_api_token,
             ),
         ):
-            """
-            In case we don't have any auth method.
+            """In case we don't have any auth method.
 
             - we can't init client.
-
             """
             raise BaseClientException(
                 client_name=self.client_name,
@@ -58,8 +54,7 @@ class HttpRequests:
         self.__logger = get_logger(__name__)
 
     def _encrypt(self, model: Any, digestmod: hashlib = hashlib.sha256) -> SecretStr:
-        """
-        HMAC encryption for request body.
+        """HMAC encryption for request body.
 
         Args:
             model: Model for encrypt. Can be BaseModel or str (cause we use __parse_data_to_encrypt method)
@@ -68,7 +63,6 @@ class HttpRequests:
 
         Returns:
             SecretStr of encrypted data.
-
         """
         input_hmac = hmac.new(
             key=self.hmac_encrypt_key.get_secret_value().encode("utf-8"),
@@ -79,15 +73,13 @@ class HttpRequests:
 
     @staticmethod
     def __parse_data_to_encrypt(model: Any) -> bytes:
-        """
-        Parse data to encrypt.
+        """Parse data to encrypt.
 
         Args:
             model: Model for encrypt. Can be BaseModel or str. Other types are not allowed now.
 
         Returns:
             Bytes of encrypted data.
-
         """
         if isinstance(model, BaseModel):
             return json.dumps(

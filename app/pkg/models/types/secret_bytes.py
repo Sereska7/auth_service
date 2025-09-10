@@ -1,6 +1,4 @@
-"""
-Secret bytes types for pydantic models.
-"""
+"""Secret bytes types for pydantic models."""
 
 from typing import Any
 
@@ -16,9 +14,8 @@ __all__ = ["EncryptedSecretBytes"]
 
 
 class EncryptedSecretBytes(SecretBytes):
-    """
-    Model for verify bytes range [6;100] and crypt than by bcrypt algorithm.
-    """
+    """Model for verify bytes range [6;100] and crypt than by bcrypt
+    algorithm."""
 
     min_length = 6
     max_length = 100

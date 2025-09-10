@@ -1,5 +1,4 @@
-"""
-All exceptions for the API you must store here.
+"""All exceptions for the API you must store here.
 
 Examples:
     This is a simple example of how to create an exception::
@@ -8,5 +7,4 @@ Examples:
         >>> class MyException(BaseAPIException):
         ...     message = "My message"
         ...     status_code = status.HTTP_400_BAD_REQUEST
-
 """

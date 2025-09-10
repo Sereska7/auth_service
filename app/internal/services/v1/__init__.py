@@ -1,6 +1,4 @@
-"""
-V1 service layer.
-"""
+"""V1 service layer."""
 
 from dependency_injector import containers, providers
 
@@ -13,9 +11,7 @@ from app.pkg.settings import settings
 
 
 class Services(containers.DeclarativeContainer):
-    """
-    Containers with services.
-    """
+    """Containers with services."""
 
     configuration = providers.Configuration(name="settings")
     configuration.from_dict(settings.model_dump())

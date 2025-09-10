@@ -1,13 +1,12 @@
-"""
-SQlAlchemy model for user.
-"""
+"""SQlAlchemy model for user."""
 
 import uuid
 from datetime import datetime
 from typing import Optional
 from uuid import UUID as UUIDType
 
-from sqlalchemy import Enum as SQLEnum, func
+from sqlalchemy import Enum as SQLEnum
+from sqlalchemy import func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 

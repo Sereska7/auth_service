@@ -1,6 +1,4 @@
-"""
-Module for crypt and decrypt password.
-"""
+"""Module for crypt and decrypt password."""
 
 import bcrypt
 
@@ -10,22 +8,19 @@ from pydantic import SecretBytes
 
 
 def crypt_password(password: bytes) -> bytes:
-    """
-    Crypt raw password.
+    """Crypt raw password.
 
     Args:
         password: Raw password in bytes.
 
     Returns:
         Crypt password used bcrypt algorithm.
-
     """
     return bcrypt.hashpw(password, bcrypt.gensalt())
 
 
 def check_password(password: SecretBytes, hashed: SecretBytes) -> bool:
-    """
-    Check equality of encrypted and raw password.
+    """Check equality of encrypted and raw password.
 
     Args:
         password: Raw password.
@@ -33,6 +28,5 @@ def check_password(password: SecretBytes, hashed: SecretBytes) -> bool:
 
     Returns:
         True if equality check passed, False otherwise.
-
     """
     return bcrypt.checkpw(password.get_secret_value(), hashed.get_secret_value())

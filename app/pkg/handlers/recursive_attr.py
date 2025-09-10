@@ -1,6 +1,4 @@
-"""
-Recursive attribute access and setting.
-"""
+"""Recursive attribute access and setting."""
 
 from functools import reduce
 from typing import TypeVar
@@ -11,8 +9,7 @@ _T = TypeVar("_T")
 
 
 def rec_getattr(obj: object, attr: str) -> _T:
-    """
-    Recursively access an attribute of an object.
+    """Recursively access an attribute of an object.
 
     Args:
         obj: Object to access.
@@ -30,14 +27,12 @@ def rec_getattr(obj: object, attr: str) -> _T:
 
     Returns:
         Attribute of an object.
-
     """
     return reduce(getattr, attr.split("."), obj)
 
 
 def rec_setattr(obj: object, attr: str, value: _T) -> None:
-    """
-    Recursively set an attribute of an object.
+    """Recursively set an attribute of an object.
 
     Args:
         obj: Object to access.
@@ -57,7 +52,6 @@ def rec_setattr(obj: object, attr: str, value: _T) -> None:
 
     Returns:
         None
-
     """
 
     attrs = attr.split(".")

@@ -1,6 +1,4 @@
-"""
-Create base rabbitmq repository.
-"""
+"""Create base rabbitmq repository."""
 
 import json
 from typing import Any
@@ -13,17 +11,14 @@ __all__ = ["RabbitMQRepository"]
 
 
 class RabbitMQRepository:
-    """
-    Create rabbitmq repository.
-    """
+    """Create rabbitmq repository."""
 
     @staticmethod
     async def create(
         message: Any,
         routing_key: str,
     ):
-        """
-        Publishes a message to RabbitMQ.
+        """Publishes a message to RabbitMQ.
 
         Args:
             message (Any): The message to publish.
@@ -31,7 +26,6 @@ class RabbitMQRepository:
 
         Returns:
             Any: The message that was sent.
-
         """
 
         async with get_connection() as channel:
@@ -46,12 +40,10 @@ class RabbitMQRepository:
 
     @staticmethod
     async def listen_queue(routing_key: str):
-        """
-        Listen to a specific message queue and process incoming messages.
+        """Listen to a specific message queue and process incoming messages.
 
         Args:
             routing_key (str): The routing key (queue name) to listen to.
-
         """
 
         async with get_connection() as channel:

@@ -1,6 +1,4 @@
-"""
-Async resource for rabbitmq connector.
-"""
+"""Async resource for rabbitmq connector."""
 
 import aio_pika
 
@@ -10,20 +8,16 @@ __all__ = ["RabbitMQ"]
 
 
 class RabbitMQ(BaseAsyncResource):
-    """
-    Rabbitmq connector using aio_pika.
-    """
+    """Rabbitmq connector using aio_pika."""
 
     async def init(self, dsn: str, *args, **kwargs) -> aio_pika.pool.Pool:
-        """
-        Getting connection to RabbitMQ in asynchronous.
+        """Getting connection to RabbitMQ in asynchronous.
 
         Args:
             dsn: D.S.N - Data Source Name.
 
         Returns:
             Created connection to RabbitMQ.
-
         """
 
         async def get_connect():
@@ -32,8 +26,7 @@ class RabbitMQ(BaseAsyncResource):
         return aio_pika.pool.Pool(get_connect, *args, **kwargs)
 
     async def shutdown(self, resource: aio_pika.pool.Pool):
-        """
-        Close connection.
+        """Close connection.
 
         Args:
             resource: Resource returned by :meth:`.RabbitMQ.init()` method.
@@ -43,7 +36,6 @@ class RabbitMQ(BaseAsyncResource):
             when the application is stopped
             or
             ``Closing`` provider is used.
-
         """
 
         await resource.close()

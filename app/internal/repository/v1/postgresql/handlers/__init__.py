@@ -1,3 +1,1 @@
-"""
-Handlers for postgresql queries.
-"""
+"""Handlers for postgresql queries."""

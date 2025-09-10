@@ -1,6 +1,4 @@
-"""
-Collect response from aiopg and convert it to an annotated model.
-"""
+"""Collect response from aiopg and convert it to an annotated model."""
 
 import json
 from functools import wraps
@@ -17,8 +15,7 @@ __all__ = ["collect_response"]
 
 
 def collect_response(fn) -> Callable[..., Model]:
-    """
-    Convert response from aioredis to an annotated model.
+    """Convert response from aioredis to an annotated model.
 
     Args:
         fn:
@@ -34,7 +31,6 @@ def collect_response(fn) -> Callable[..., Model]:
 
     Raises:
         EmptyResult: when a query of `fn` returns None.
-
     """
 
     @wraps(fn)
@@ -43,9 +39,8 @@ def collect_response(fn) -> Callable[..., Model]:
         *args: object,
         **kwargs: object,
     ) -> List[type[Model]] | type[Model]:
-        """
-        Inner function of :func:`.collect_response`. Convert response from aiopg to an annotated
-        model.
+        """Inner function of :func:`.collect_response`. Convert response from
+        aiopg to an annotated model.
 
         Args:
             *args:
@@ -58,7 +53,6 @@ def collect_response(fn) -> Callable[..., Model]:
 
         Returns:
             The model that is specified in type hints of `fn`.
-
         """
 
         response = await fn(*args, **kwargs)
@@ -73,8 +67,7 @@ async def process_response(
     *args: object,
     **kwargs: object,
 ) -> Union[List[Type[Model]], Type[Model], None]:
-    """
-    Process the response and convert it to the appropriate model.
+    """Process the response and convert it to the appropriate model.
 
     Args:
         fn: The target function.
@@ -82,7 +75,6 @@ async def process_response(
 
     Returns:
         The processed response in the form of the model.
-
     """
 
     return_annotation = kwargs.get("result_model")
@@ -128,8 +120,8 @@ def __is_optional_type(origin) -> bool:
 
 
 async def __convert_response(response: bytes | bytearray, annotations: str):
-    """
-    Converts the response of the request to List of models or to a single model.
+    """Converts the response of the request to List of models or to a single
+    model.
 
     Args:
         response:
@@ -140,7 +132,6 @@ async def __convert_response(response: bytes | bytearray, annotations: str):
     Returns:
         List[`Model`] if List is specified in the type annotations,
         or a single `Model` if `Model` is specified in the type annotations.
-
     """
 
     decoded = response.decode("utf-8")
@@ -155,8 +146,7 @@ async def __convert_response(response: bytes | bytearray, annotations: str):
 
 
 async def __convert_memory_viewer(r: dict[str, bytes]) -> dict[str, bytes]:
-    """
-    Convert memory viewer in bytes.
+    """Convert memory viewer in bytes.
 
     Notes:
         aiopg returns memory viewer in query response,
@@ -164,7 +154,6 @@ async def __convert_memory_viewer(r: dict[str, bytes]) -> dict[str, bytes]:
 
     Returns:
         Converted to model string.
-
     """
 
     for key, value in r.items():

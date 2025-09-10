@@ -1,6 +1,4 @@
-"""
-Repository container.
-"""
+"""Repository container."""
 
 from dependency_injector import containers, providers
 
@@ -11,8 +9,7 @@ __all__ = ["Repositories"]
 
 
 class Repositories(containers.DeclarativeContainer):
-    """
-    Container for repositories.
+    """Container for repositories.
 
     Attributes:
         postgres (providers.Container): Container for postgresql repositories.
@@ -20,7 +17,6 @@ class Repositories(containers.DeclarativeContainer):
     Notes:
         If you want to add a new repository,
         you **must** add it to this container.
-
     """
 
     postgres = providers.Container(postgresql.Repositories)

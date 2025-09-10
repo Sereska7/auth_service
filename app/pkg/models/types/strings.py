@@ -1,6 +1,4 @@
-"""
-Strings types for pydantic models.
-"""
+"""Strings types for pydantic models."""
 
 from __future__ import annotations
 
@@ -13,17 +11,13 @@ __all__ = ["NotEmptySecretStr", "NotEmptyStr"]
 
 # TODO: Use generic pydantic model for create min and max range
 class NotEmptySecretStr(SecretStr):
-    """
-    Validate, that length of string is less or equal than 1.
-    """
+    """Validate, that length of string is less or equal than 1."""
 
     min_length = 1
 
 
 class NotEmptyStr(str):
-    """
-    Validate, that length of string is less or equal than 1.
-    """
+    """Validate, that length of string is less or equal than 1."""
 
     min_length: int | None = 1
     max_length: int | None = None

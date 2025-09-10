@@ -1,6 +1,4 @@
-"""
-Models for dependency_injector containers.
-"""
+"""Models for dependency_injector containers."""
 
 from dataclasses import dataclass, field
 from typing import Callable, List, Type, Union
@@ -16,8 +14,7 @@ __all__ = ["Container", "Containers", "Resource"]
 
 @dataclass(frozen=True)
 class Resource:
-    """
-    Model for contain single resource.
+    """Model for contain single resource.
 
     Attributes:
         container:
@@ -29,7 +26,6 @@ class Resource:
         packages:
             Array of packages to which the injector will be available.
             Default: ["app"]
-
     """
 
     container: Type[_DIContainer]
@@ -41,8 +37,7 @@ class Resource:
 
 @dataclass(frozen=True)
 class Container:
-    """
-    Model for contain single container.
+    """Model for contain single container.
 
     Attributes:
         container:
@@ -50,7 +45,6 @@ class Container:
         packages:
             Array of packages to which the injector will be available.
             Default: ["app"]
-
     """
 
     container: Union[Callable[..., containers.Container]]
@@ -59,13 +53,10 @@ class Container:
 
 
 class WiredContainer(dict, metaclass=SingletonMeta):
-    """
-    Singleton container for store all wired containers.
-    """
+    """Singleton container for store all wired containers."""
 
     def __getitem__(self, item: object) -> containers.Container:
-        """
-        Get container by name.
+        """Get container by name.
 
         Args:
             item: Container object.
@@ -81,7 +72,6 @@ class WiredContainer(dict, metaclass=SingletonMeta):
 
         Returns:
             Container instance.
-
         """
 
         return super().__getitem__(item.__name__)
@@ -89,9 +79,7 @@ class WiredContainer(dict, metaclass=SingletonMeta):
 
 @dataclass(frozen=True)
 class Containers:
-    """
-    Frozen dataclass model, for contains all declarative containers.
-    """
+    """Frozen dataclass model, for contains all declarative containers."""
 
     #: str: __name__ of the main package.
     pkg_name: str
@@ -111,8 +99,7 @@ class Containers:
         pkg_name: str | None = None,
         unwire: bool = False,
     ) -> None:
-        """
-        Wire packages to the declarative containers.
+        """Wire packages to the declarative containers.
 
         Args:
             app:
@@ -159,7 +146,6 @@ class Containers:
 
         Returns:
             None
-
         """
         pkg_name = pkg_name if pkg_name else self.pkg_name
         for container in self.containers:
@@ -178,8 +164,7 @@ class Containers:
         pkg_name: str,
         app: FastAPI | None = None,
     ) -> Container:
-        """
-        Wire container to the declarative containers.
+        """Wire container to the declarative containers.
 
         Args:
             container: Container or Resource model.
@@ -190,7 +175,6 @@ class Containers:
 
         Returns:
             ``Container``
-
         """
 
         cont = container.container()
@@ -221,8 +205,7 @@ class Containers:
         dsn_configuration_path: str = "POSTGRES.DSN",
         prefix: str = "test_",
     ) -> None:
-        """
-        Set environment for injection.
+        """Set environment for injection.
 
         Using `container.configuration` for rewrite
         ``database_configuration_path`` parameter in `settings`.
@@ -241,7 +224,6 @@ class Containers:
 
         Returns:
             None
-
         """
         self.wire_packages(pkg_name=pkg_name, unwire=True)
 
@@ -271,8 +253,7 @@ class Containers:
         dsn_configuration_path: str,
         prefix: str,
     ) -> _DIContainer | None:
-        """
-        Patch container configuration.
+        """Patch container configuration.
 
         Args:
             container: ``Container`` for patch configuration
@@ -282,7 +263,6 @@ class Containers:
 
         Returns:
             ``Container`` with patched configuration
-
         """
 
         conf: providers.Configuration = container.container().configuration

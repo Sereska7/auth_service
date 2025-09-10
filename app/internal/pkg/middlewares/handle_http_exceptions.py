@@ -1,5 +1,5 @@
-"""
-Handlers that handle internal error raise and returns ``http json`` response.
+"""Handlers that handle internal error raise and returns ``http json``
+response.
 
 Examples:
     For example, if in some level in verification_code you raise error inherited by
@@ -20,7 +20,6 @@ Examples:
         {
             "message": "test error."
         }
-
 """
 
 from starlette import status
@@ -41,8 +40,7 @@ logger = get_logger(__name__)
 
 
 def handle_drivers_exceptions(request: Request, exc: DriverError) -> JSONResponse:
-    """
-    Handle all internal exceptions to :class:`.DriverError`.
+    """Handle all internal exceptions to :class:`.DriverError`.
 
     Args:
         request:
@@ -52,7 +50,6 @@ def handle_drivers_exceptions(request: Request, exc: DriverError) -> JSONRespons
 
     Returns:
         ``JSONResponse`` object with status verification_code 500.
-
     """
 
     request_id = getattr(request.state, "request_id", None)
@@ -76,8 +73,8 @@ def handle_drivers_exceptions(request: Request, exc: DriverError) -> JSONRespons
 
 
 def handle_api_exceptions(request: Request, exc: BaseAPIException):
-    """
-    Handle all internal exceptions that inherited from :class:`.BaseAPIException`.
+    """Handle all internal exceptions that inherited from
+    :class:`.BaseAPIException`.
 
     Args:
         request:
@@ -87,7 +84,6 @@ def handle_api_exceptions(request: Request, exc: BaseAPIException):
 
     Returns:
         ``JSONResponse`` object with status verification_code from ``exc.status_code``.
-
     """
 
     request_id = getattr(request.state, "request_id", None)
@@ -112,8 +108,7 @@ def handle_api_exceptions(request: Request, exc: BaseAPIException):
 
 
 def handle_internal_exception(request: Request, exc: Exception):
-    """
-    Handle all internal unhandled exceptions.
+    """Handle all internal unhandled exceptions.
 
     Args:
         request:
@@ -123,7 +118,6 @@ def handle_internal_exception(request: Request, exc: Exception):
 
     Returns:
         ``JSONResponse`` object with status verification_code 500.
-
     """
 
     request_id = getattr(request.state, "request_id", None)

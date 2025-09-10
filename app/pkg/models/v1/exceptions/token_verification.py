@@ -1,6 +1,4 @@
-"""
-Exceptions for token-based auth verification.
-"""
+"""Exceptions for token-based auth verification."""
 
 from starlette import status
 

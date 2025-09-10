@@ -1,6 +1,4 @@
-"""
-Base model for all models in API server.
-"""
+"""Base model for all models in API server."""
 
 from __future__ import annotations
 
@@ -21,9 +19,7 @@ _T = TypeVar("_T")
 
 
 class BaseModel(pydantic.BaseModel):
-    """
-    Base model for all models in API server.
-    """
+    """Base model for all models in API server."""
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -40,8 +36,7 @@ class BaseModel(pydantic.BaseModel):
         values: dict[Any, Any] = None,
         **kwargs,
     ) -> dict[Any, Any]:
-        """
-        Make a representation model from a class object to Dict object.
+        """Make a representation model from a class object to Dict object.
 
         Args:
             show_secrets:
@@ -116,7 +111,6 @@ class BaseModel(pydantic.BaseModel):
 
         Returns:
             Dict object with reveal password filed.
-
         """
 
         values = self.model_dump(**kwargs).items() if not values else values.items()
@@ -127,8 +121,7 @@ class BaseModel(pydantic.BaseModel):
         return r
 
     def __cast_values(self, v: _T, show_secrets: bool, **kwargs) -> _T:
-        """
-        Cast value for dict object.
+        """Cast value for dict object.
 
         Args:
             v:
@@ -138,11 +131,17 @@ class BaseModel(pydantic.BaseModel):
 
         Warnings:
             This method is not memory optimized.
-
         """
 
         if isinstance(v, (typing.List, typing.Tuple, list, tuple)):
-            return [self.__cast_values(v=ve, show_secrets=show_secrets, **kwargs) for ve in v]
+            return [
+                self.__cast_values(
+                    v=ve,
+                    show_secrets=show_secrets,
+                    **kwargs,
+                )
+                for ve in v
+            ]
 
         elif isinstance(v, (pydantic.SecretBytes, pydantic.SecretStr)):
             return self.__cast_secret(v=v, show_secrets=show_secrets)
@@ -160,15 +159,13 @@ class BaseModel(pydantic.BaseModel):
 
     @staticmethod
     def __cast_datetime_types(v: _T) -> _T:
-        """
-        Cast datetime types to str.
+        """Cast datetime types to str.
 
         Args:
             v: Any value.
 
         Returns:
             str value of ``v``.
-
         """
 
         if isinstance(v, datetime):
@@ -180,15 +177,13 @@ class BaseModel(pydantic.BaseModel):
 
     @staticmethod
     def __cast_secret(v, show_secrets: bool) -> str:
-        """
-        Cast secret value to str.
+        """Cast secret value to str.
 
         Args:
             v: pydantic.Secret* object.
             show_secrets: bool value. If True, then the secret will be revealed.
 
         Returns: str value of ``v``.
-
         """
 
         if isinstance(v, pydantic.SecretBytes):
@@ -197,8 +192,7 @@ class BaseModel(pydantic.BaseModel):
             return v.get_secret_value() if show_secrets else str(v)
 
     def delete_attribute(self, attr: str) -> BaseModel:
-        """
-        Delete some attribute field from a model.
+        """Delete some attribute field from a model.
 
         Args:
             attr:
@@ -206,7 +200,6 @@ class BaseModel(pydantic.BaseModel):
 
         Returns:
             self object.
-
         """
 
         delattr(self, attr)
@@ -219,8 +212,7 @@ class BaseModel(pydantic.BaseModel):
         match_keys: dict[str, str] | None = None,
         extra_fields: dict[str, typing.Any] | None = None,
     ) -> Model:
-        """
-        Migrate one model to another ignoring missmatch.
+        """Migrate one model to another ignoring missmatch.
 
         Args:
             model:
@@ -304,7 +296,6 @@ class BaseModel(pydantic.BaseModel):
 
         Returns:
             pydantic model parsed from ``model``.
-
         """
 
         self_dict_model = self.to_dict(show_secrets=True)

@@ -1,6 +1,4 @@
-"""
-Module with RabbitMQ exceptions for the application.
-"""
+"""Module with RabbitMQ exceptions for the application."""
 
 from starlette import status
 

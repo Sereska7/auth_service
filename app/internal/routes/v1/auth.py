@@ -1,9 +1,8 @@
-"""
-Routes for Auth module.
-"""
+"""Routes for Auth module."""
 
 from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Response, status
+
 from app.internal.services import Services
 from app.internal.services.v1 import AuthService
 from app.pkg.models import v1 as models
@@ -30,7 +29,7 @@ async def login(
     tokens = await auth_service.authenticate_user(cmd)
     auth_service.set_token_cookies(
         response=response,
-        tokens=tokens
+        tokens=tokens,
     )
 
     return tokens
@@ -86,7 +85,7 @@ async def refresh_tokens(
 
     auth_service.set_token_cookies(
         response=response,
-        tokens=tokens
+        tokens=tokens,
     )
 
     return tokens

@@ -1,6 +1,4 @@
-"""
-Handle RabbitMQ Query Exceptions.
-"""
+"""Handle RabbitMQ Query Exceptions."""
 
 from typing import AsyncGenerator, Callable
 
@@ -14,8 +12,7 @@ __all__ = ["handle_exception"]
 def handle_exception(
     func: Callable[..., Model],
 ) -> Callable[..., AsyncGenerator[Model, None]]:
-    """
-    Decorator Catching RabbitMQ Query Exceptions.
+    """Decorator Catching RabbitMQ Query Exceptions.
 
     Args:
         func: callable function object.
@@ -29,12 +26,10 @@ def handle_exception(
         EmptyResult: Function returned epmty result.
         AMQPError: AMQP exception.
         DriverError: Unexcepted rabbit exception.
-
     """
 
     async def wrapper(*args: object, **kwargs: object) -> AsyncGenerator[Model, None]:
-        """
-        Inner function. Catching RabbitMQ Query Exceptions.
+        """Inner function. Catching RabbitMQ Query Exceptions.
 
         Args:
             *args: Positional arguments.
@@ -46,7 +41,6 @@ def handle_exception(
             EmptyResult: Function returned epmty result.
             AMQPError: AMQP exception.
             DriverError: Unexcepted rabbit exception.
-
         """
 
         try:

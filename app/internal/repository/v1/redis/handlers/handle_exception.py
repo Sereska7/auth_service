@@ -1,6 +1,4 @@
-"""
-Handle Redis Query Exceptions.
-"""
+"""Handle Redis Query Exceptions."""
 
 from collections.abc import Callable
 
@@ -13,8 +11,7 @@ __all__ = ["handle_exception"]
 
 
 def handle_exception(func: Callable[..., Model]) -> Callable[..., Model]:
-    """
-    Decorator Catching Postgresql Query Exceptions.
+    """Decorator Catching Postgresql Query Exceptions.
 
     Args:
         func:
@@ -25,12 +22,10 @@ def handle_exception(func: Callable[..., Model]) -> Callable[..., Model]:
 
     Raises:
         DriverError: Any error during execution query on a database.
-
     """
 
     async def wrapper(*args: object, **kwargs: object) -> Model:
-        """
-        Inner function. Catching Redis Query Exceptions.
+        """Inner function. Catching Redis Query Exceptions.
 
         Args:
             *args:
@@ -43,7 +38,6 @@ def handle_exception(func: Callable[..., Model]) -> Callable[..., Model]:
 
         Returns:
             Result of call function.
-
         """
 
         try:

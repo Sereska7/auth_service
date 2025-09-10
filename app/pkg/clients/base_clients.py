@@ -1,6 +1,5 @@
-"""
-Request to API with HMAC encryption or X-ACCESS-TOKEN header authentication.
-"""
+"""Request to API with HMAC encryption or X-ACCESS-TOKEN header
+authentication."""
 
 import hashlib
 import hmac
@@ -30,9 +29,8 @@ __all__ = ["BaseClient"]
 
 
 class BaseClient:
-    """
-    Request to API with HMAC encryption or X-ACCESS-TOKEN header authentication.
-    """
+    """Request to API with HMAC encryption or X-ACCESS-TOKEN header
+    authentication."""
 
     client_name: str
     token: pydantic.SecretStr
@@ -46,8 +44,7 @@ class BaseClient:
         self.__logger = get_logger(__name__)
 
     def _encrypt(self, model: Any, digestmod: hashlib = hashlib.sha256) -> SecretStr:
-        """
-        HMAC encryption for request body.
+        """HMAC encryption for request body.
 
         Args:
             model: Model for encrypt.
@@ -57,7 +54,6 @@ class BaseClient:
 
         Returns:
             SecretStr of encrypted data.
-
         """
         input_hmac = hmac.new(
             key=self.hmac_encrypt_key.get_secret_value().encode("utf-8"),
@@ -68,8 +64,7 @@ class BaseClient:
 
     @staticmethod
     def __parse_data_to_encrypt(model: Any) -> bytes:
-        """
-        Parse data to encrypt.
+        """Parse data to encrypt.
 
         Args:
             model: Model for encrypt. Can be BaseModel or str.
@@ -77,7 +72,6 @@ class BaseClient:
 
         Returns:
             Bytes of encrypted data.
-
         """
         if isinstance(model, BaseModel):
             return json.dumps(
@@ -137,15 +131,13 @@ class BaseClient:
         raise BaseExceptionFromClient from ex
 
     def handle_client_error(self, ex: Exception) -> None:
-        """
-        Logs and throws client error from exception.
+        """Logs and throws client error from exception.
 
         Args:
             ex (Exception): Exception to throw
 
         Returns:
             None.
-
         """
         self.__logger.exception(
             "Error while sending request, client = %s.",
@@ -155,15 +147,13 @@ class BaseClient:
         raise BaseExceptionFromClient from ex
 
     def handle_response(self, response: httpx.Response) -> httpx.Response:
-        """
-        Handle response from API.
+        """Handle response from API.
 
         Args:
             response (httpx.Response): Response from API.
 
         Returns:
             httpx.Response: Response from API.
-
         """
 
         http_status = response.status_code

@@ -1,8 +1,7 @@
-"""
-This package contains all the handlers for the application.
+"""This package contains all the handlers for the application.
 
-In this package, you can store handlers that help you inherit and extend native python logic.
-
+In this package, you can store handlers that help you inherit and extend
+native python logic.
 """
 
 # ruff: noqa

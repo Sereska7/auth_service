@@ -1,6 +1,5 @@
-"""
-Repositories should be dumb, while services, on the contrary, should be smart. That's why
-:class:`.Repository` must contain a minimum set of.
+"""Repositories should be dumb, while services, on the contrary, should be
+smart. That's why :class:`.Repository` must contain a minimum set of.
 
 **C.R.U.D.** methods.
 
@@ -57,7 +56,6 @@ Examples:
         ...        user.password = cmd.new_password
         ...        user.migrate(ChangeUserPasswordCommand)
         ...        return self.repository.update(cmd=cmd.migrate(UpdateUserCommand))
-
 """
 
 from dependency_injector import containers, providers
@@ -68,8 +66,7 @@ __all__ = ["Repositories"]
 
 
 class Repositories(containers.DeclarativeContainer):
-    """
-    Container for repositories.
+    """Container for repositories.
 
     Attributes:
         postgres (providers.Container): Container for postgresql repositories.
@@ -77,7 +74,6 @@ class Repositories(containers.DeclarativeContainer):
     Notes:
         If you want to add a new repository,
         you **must** add it to this container.
-
     """
 
     v1 = providers.Container(v1.Repositories)

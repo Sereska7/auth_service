@@ -1,6 +1,4 @@
-"""
-Auth models.
-"""
+"""Auth models."""
 
 from pydantic import EmailStr
 from pydantic.fields import Field
@@ -13,15 +11,11 @@ __all__ = ["AuthCommand", "TokenResponse"]
 
 
 class BaseAuth(BaseModel):
-    """
-    Base model for User.
-    """
+    """Base model for User."""
 
 
 class AuthFields:
-    """
-    User fields.
-    """
+    """User fields."""
 
     access_token: str = Field(
         description="JWT access token to be used for authenticated requests.",
@@ -38,18 +32,15 @@ class AuthFields:
 
 
 class AuthCommand(BaseAuth):
-    """
-    Command model for user authentication (login).
-    """
+    """Command model for user authentication (login)."""
 
     user_email: EmailStr = UserFields.user_email
     user_password: EncryptedSecretBytes = UserFields.user_password
 
 
 class TokenResponse(BaseAuth):
-    """
-    Response model containing access and refresh tokens along with the token type.
-    """
+    """Response model containing access and refresh tokens along with the token
+    type."""
 
     access_token: str = AuthFields.access_token
     refresh_token: str = AuthFields.refresh_token

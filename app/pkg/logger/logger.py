@@ -1,6 +1,4 @@
-"""
-Logger module.
-"""
+"""Logger module."""
 
 import json
 import logging
@@ -13,8 +11,7 @@ init(autoreset=True)
 
 
 class JsonFormatter(logging.Formatter):
-    """
-    Custom JSON formatter for logging, with color coding by log level.
+    """Custom JSON formatter for logging, with color coding by log level.
 
     Attributes:
         LEVEL_COLOR (dict[str, str]): Color mappings for each log level.
@@ -24,7 +21,6 @@ class JsonFormatter(logging.Formatter):
             Defaults to {"message": "message"}.
         time_format (str): Format string for time display. Default is "%Y-%m-%dT%H:%M:%S".
         msec_format (str): Microsecond formatting string, appended to the end. Default is "%s.%03dZ".
-
     """
 
     LEVEL_COLOR: dict[str, str] = {
@@ -48,18 +44,15 @@ class JsonFormatter(logging.Formatter):
         self.datefmt = None
 
     def usesTime(self) -> bool:  # noqa N802
-        """
-        Check if the formatter uses time in output.
+        """Check if the formatter uses time in output.
 
         Returns:
             bool: True if 'asctime' is a part of the output, False otherwise.
-
         """
         return "asctime" in self.fmt_dict.values()
 
     def formatMessage(self, record: logging.LogRecord) -> dict[str, str]:  # noqa N802
-        """
-        Format the log record as a dictionary based on `fmt_dict` mappings.
+        """Format the log record as a dictionary based on `fmt_dict` mappings.
 
         Args:
             record (logging.LogRecord): The log record to format.
@@ -69,22 +62,24 @@ class JsonFormatter(logging.Formatter):
 
         Raises:
             KeyError: If an unknown attribute is provided in `fmt_dict`.
-
         """
         return {
-            fmt_key: record.__dict__.get(fmt_val, "") for fmt_key, fmt_val in self.fmt_dict.items()
+            fmt_key: record.__dict__.get(
+                fmt_val,
+                "",
+            )
+            for fmt_key, fmt_val in self.fmt_dict.items()
         }
 
     def format(self, record: logging.LogRecord) -> str:
-        """
-        Format the log record as a JSON string, with color coding based on log level.
+        """Format the log record as a JSON string, with color coding based on
+        log level.
 
         Args:
             record (logging.LogRecord): The log record to format.
 
         Returns:
             str: JSON-formatted log record with color coding.
-
         """
         record.message = record.getMessage()
 
@@ -108,18 +103,29 @@ class JsonFormatter(logging.Formatter):
 
         if settings.API.ENVIROMENT == "dev":
             colored_message = (
-                color + json.dumps(message_dict, default=str, indent=4) + Style.RESET_ALL
+                color
+                + json.dumps(
+                    message_dict,
+                    default=str,
+                    indent=4,
+                )
+                + Style.RESET_ALL
             )
         else:
-            colored_message = color + json.dumps(message_dict, default=str) + Style.RESET_ALL
+            colored_message = (
+                color
+                + json.dumps(
+                    message_dict,
+                    default=str,
+                )
+                + Style.RESET_ALL
+            )
 
         return colored_message
 
 
 class NestedExtraLogger(logging.Logger):
-    """
-    Logger that contain extra data dict in record in "extra" attribute.
-    """
+    """Logger that contain extra data dict in record in "extra" attribute."""
 
     def makeRecord(
         self,
@@ -153,12 +159,10 @@ logging.setLoggerClass(NestedExtraLogger)
 
 
 def get_stream_handler() -> logging.StreamHandler:
-    """
-    Create and return a stream handler with JSON formatting.
+    """Create and return a stream handler with JSON formatting.
 
     Returns:
         logging.StreamHandler: Stream handler with JSONFormatter set as the formatter.
-
     """
     stream_handler = logging.StreamHandler()
     json_formatter = JsonFormatter(
@@ -179,15 +183,13 @@ def get_stream_handler() -> logging.StreamHandler:
 
 
 def get_logger(name: str) -> logging.Logger:
-    """
-    Retrieve or create a logger with a specified name.
+    """Retrieve or create a logger with a specified name.
 
     Args:
         name (str): Name for the logger.
 
     Returns:
         logging.Logger: Configured logger with stream handler and JSON formatting.
-
     """
     logger = logging.getLogger(name)
     handler_1 = get_stream_handler()

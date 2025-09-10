@@ -1,3 +1,1 @@
-"""
-Business models.
-"""
+"""Business models."""

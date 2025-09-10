@@ -1,9 +1,8 @@
-"""
-Models for Auth object.
-"""
+"""Models for Auth object."""
 
 from logging import Logger
 from uuid import UUID
+
 from fastapi import Response
 from jose import jwt
 
@@ -27,17 +26,14 @@ __all__ = ["AuthService"]
 
 
 class AuthService:
-    """
-    Auth service class.
-    """
+    """Auth service class."""
 
     user_repository: UserRepository
     jwt_handler: JWTHandler
     __logger: Logger = get_logger(__name__)
 
     async def issue_tokens(self, user_id: UUID) -> models.TokenResponse:
-        """
-        Issues a new pair of access and refresh tokens for the given user.
+        """Issues a new pair of access and refresh tokens for the given user.
 
         Args:
             user_id (UUID): The ID of the user.
@@ -58,8 +54,8 @@ class AuthService:
         )
 
     async def authenticate_user(self, cmd: models.AuthCommand) -> models.TokenResponse:
-        """
-        Authenticates a user using email and password, then returns access and refresh tokens.
+        """Authenticates a user using email and password, then returns access
+        and refresh tokens.
 
         Args:
             cmd (models.AuthCommand): Command object containing user credentials (email and password).
@@ -92,15 +88,13 @@ class AuthService:
         return await self.issue_tokens(user.user_id)
 
     async def refresh_access_token(self, refresh_token: str) -> models.TokenResponse:
-        """
-        Refreshes the access token using a valid refresh token.
+        """Refreshes the access token using a valid refresh token.
 
         Args:
             refresh_token (str): The refresh token string provided by the client.
 
         Returns:
             models.TokenResponse: Contains new access and refresh tokens with token type.
-
         """
 
         payload = jwt.decode(
@@ -128,15 +122,13 @@ class AuthService:
         )
 
     async def get_current_user(self, token: str) -> models.User:
-        """
-        Retrieves the current user based on the provided access token.
+        """Retrieves the current user based on the provided access token.
 
         Args:
             token (str): The JWT access token.
 
         Returns:
             models.User: The full user data retrieved from the repository.
-
         """
 
         payload = self.jwt_handler.decode_access_token(token)

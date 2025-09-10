@@ -1,4 +1,4 @@
-""" """
+""""""
 
 from datetime import datetime, timedelta, timezone
 from logging import Logger
@@ -26,7 +26,7 @@ async def get_token_from_cookie(request: Request) -> str:
 
 
 class JWTHandler:
-    """ """
+    """"""
 
     user_repository: UserRepository
     __logger: Logger = get_logger(__name__)
@@ -57,7 +57,8 @@ class JWTHandler:
     def create_refresh_token(data: dict, expires_delta: timedelta = None) -> str:
         return JWTHandler._create_token(
             data=data,
-            expires_delta=expires_delta or timedelta(days=settings.JWT.REFRESH_TOKEN_EXPIRE_DAYS),
+            expires_delta=expires_delta
+            or timedelta(days=settings.JWT.REFRESH_TOKEN_EXPIRE_DAYS),
             secret_key=settings.JWT.REFRESH_SECRET_KEY.get_secret_value(),
             algorithm=settings.JWT.ALGORITHM,
         )

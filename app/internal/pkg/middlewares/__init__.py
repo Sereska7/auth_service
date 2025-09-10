@@ -1,3 +1,1 @@
-"""
-Server middlewares.
-"""
+"""Server middlewares."""

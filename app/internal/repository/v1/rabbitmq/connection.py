@@ -1,6 +1,4 @@
-"""
-Create connection to rabbitmq.
-"""
+"""Create connection to rabbitmq."""
 
 from contextlib import asynccontextmanager
 from typing import Union
@@ -19,8 +17,7 @@ async def get_connection(
     pool: aio_pika.pool.Pool = Provide[Connectors.rabbitmq.connector],
     return_pool: bool = False,
 ) -> Union[aio_pika.Channel, aio_pika.pool.Pool]:
-    """
-    Get async connection pool to rabbitmq.
+    """Get async connection pool to rabbitmq.
 
     Args:
         pool:
@@ -40,7 +37,6 @@ async def get_connection(
 
     Returns:
         Async connection to rabbitmq.
-
     """
 
     if not isinstance(pool, aio_pika.pool.Pool):
@@ -58,8 +54,7 @@ async def get_connection(
 async def acquire_connection(
     pool: aio_pika.pool.Pool,
 ) -> aio_pika.Channel:
-    """
-    Acquire connection from pool.
+    """Acquire connection from pool.
 
     Args:
         pool:
@@ -82,7 +77,6 @@ async def acquire_connection(
 
     Returns:
         Async connection to rabbitmq.
-
     """
 
     async with pool.acquire() as conn:

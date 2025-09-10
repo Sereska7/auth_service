@@ -1,6 +1,4 @@
-"""
-Models for User object.
-"""
+"""Models for User object."""
 
 import json
 from datetime import datetime, timezone
@@ -39,9 +37,7 @@ __all__ = ["UserService"]
 
 
 class UserService:
-    """
-    User service class.
-    """
+    """User service class."""
 
     user_repository: UserRepository
     redis_repository: redis.BaseRedisRepository
@@ -52,15 +48,13 @@ class UserService:
         self,
         cmd: models.UserRegisterCommand,
     ) -> models.UserRegisterResponse:
-        """
-        Registers a new user in the system.
+        """Registers a new user in the system.
 
         Args:
             cmd (models.UserRegisterCommand): Command object containing user registration data.
 
         Returns:
             models.UserRegisterResponse: The newly created user details.
-
         """
 
         try:
@@ -124,14 +118,13 @@ class UserService:
 
     async def verify_user_email(
         self,
-        cmd: models.UserVerifyCommand
+        cmd: models.UserVerifyCommand,
     ) -> models.UserResponse:
-        """
-        Verifies a user's email address by checking the provided verification code.
+        """Verifies a user's email address by checking the provided
+        verification code.
 
         Args:
             cmd (models.UserVerifyCommand): Command object containing the verification ID and code.
-
         """
 
         try:
@@ -183,8 +176,7 @@ class UserService:
         user: models.User,
         cmd: models.UserChangePasswordCommand,
     ) -> models.UserResponse:
-        """
-        Changes the password of the authenticated user.
+        """Changes the password of the authenticated user.
 
         Args:
             user (models.User): The currently authenticated user.
@@ -192,7 +184,6 @@ class UserService:
 
         Returns:
             models.UserResponse: The updated user with the new password.
-
         """
 
         if not check_password(cmd.old_password, user.hashed_password):
@@ -216,15 +207,13 @@ class UserService:
         self,
         cmd: models.UserUpdateDataCommand,
     ) -> models.UserResponse:
-        """
-        Updates user data with the provided information.
+        """Updates user data with the provided information.
 
         Args:
             cmd (models.UserUpdateDataCommand): Command containing new user data to update.
 
         Returns:
             models.UserResponse: The updated user data.
-
         """
         try:
             return await self.user_repository.update_data(cmd)

@@ -1,6 +1,4 @@
-"""
-User repository for PostgresSQL database.
-"""
+"""User repository for PostgresSQL database."""
 
 from abc import ABC
 from typing import TypeVar
@@ -13,9 +11,7 @@ BaseRepository = TypeVar("BaseRepository", bound="BaseRedisRepository")
 
 
 class BaseRedisRepository(ABC):
-    """
-    Repository for alert manager system.
-    """
+    """Repository for alert manager system."""
 
     @staticmethod
     async def create(

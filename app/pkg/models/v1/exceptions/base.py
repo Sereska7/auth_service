@@ -1,6 +1,4 @@
-"""
-Module with base exceptions for the application.
-"""
+"""Module with base exceptions for the application."""
 
 from starlette import status
 

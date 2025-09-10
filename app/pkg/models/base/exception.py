@@ -1,6 +1,4 @@
-"""
-Base exception for API.
-"""
+"""Base exception for API."""
 
 from fastapi import HTTPException
 from starlette import status
@@ -11,8 +9,7 @@ __all__ = ["BaseAPIException", "BaseClientException", "BaseExternalClientExcepti
 
 
 class BaseAPIException(HTTPException):
-    """
-    Base internal API Exception.
+    """Base internal API Exception.
 
     Attributes:
         message:
@@ -34,7 +31,6 @@ class BaseAPIException(HTTPException):
 
             >>> async def my_func():
             ...     raise MyException
-
     """
 
     # TODO: Добавить магическое слово, при определении которого, будет выбираться
@@ -44,13 +40,11 @@ class BaseAPIException(HTTPException):
     status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR
 
     def __init__(self, message: (NotEmptyStr | str | Exception | dict) | None = None):
-        """
-        Init BaseAPIException.
+        """Init BaseAPIException.
 
         Args:
             message:
                 Message of exception by default is "Base API Exception".
-
         """
         if message is not None:
             self.message = message

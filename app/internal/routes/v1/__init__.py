@@ -1,6 +1,4 @@
-"""
-Routes for version 1 of the API.
-"""
+"""Routes for version 1 of the API."""
 
 from fastapi import APIRouter
 

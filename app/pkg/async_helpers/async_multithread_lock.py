@@ -1,6 +1,4 @@
-"""
-This module contains a class for locking.
-"""
+"""This module contains a class for locking."""
 
 import asyncio
 import contextlib
@@ -9,8 +7,7 @@ from concurrent import futures
 
 
 class AsyncMultiprocessingLock:
-    """
-    This class is used for locking both async and multiprocess apps.
+    """This class is used for locking both async and multiprocess apps.
 
     You can easily adapt it from multithreading. Just set self._lock = threading.Lock()
 
@@ -22,7 +19,6 @@ class AsyncMultiprocessingLock:
     Be careful, threading.Lock does not lock processes even if it is shared between them
 
     Source: https://stackoverflow.com/a/63425191
-
     """
 
     _pool = futures.ThreadPoolExecutor()
@@ -32,9 +28,7 @@ class AsyncMultiprocessingLock:
 
     @contextlib.asynccontextmanager
     async def async_lock(self) -> None:
-        """
-        Use inside async methods as 'async with object.async_lock():'.
-        """
+        """Use inside async methods as 'async with object.async_lock():'."""
         loop = asyncio.get_event_loop()
 
         await loop.run_in_executor(self._pool, self._lock.acquire)
@@ -46,9 +40,7 @@ class AsyncMultiprocessingLock:
 
     @contextlib.contextmanager
     def lock(self) -> None:
-        """
-        Use inside sync methods as 'with object.lock():'.
-        """
+        """Use inside sync methods as 'with object.lock():'."""
 
         with self._lock:
             try:

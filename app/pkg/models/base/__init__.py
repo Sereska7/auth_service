@@ -1,8 +1,6 @@
-"""
-Base business models.
+"""Base business models.
 
 All models **must** inherit from them.
-
 """
 
 # ruff: noqa

@@ -1,6 +1,4 @@
-"""
-Lifespan function.
-"""
+"""Lifespan function."""
 
 import asyncio
 from contextlib import asynccontextmanager
@@ -18,7 +16,9 @@ async def lifespan(
 
 
 async def shutdown_event() -> None:
-    pending = [task for task in asyncio.all_tasks() if task is not asyncio.current_task()]
+    pending = [
+        task for task in asyncio.all_tasks() if task is not asyncio.current_task()
+    ]
     for task in pending:
         task.cancel()
 
