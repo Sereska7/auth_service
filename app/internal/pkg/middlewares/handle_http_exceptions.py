@@ -2,7 +2,7 @@
 response.
 
 Examples:
-    For example, if in some level in code you raise error inherited by
+    For example, if in some level in verification_code you raise error inherited by
     :class:`.BaseAPIException`::
 
         >>> ...  # exceptions.py
@@ -15,7 +15,7 @@ Examples:
         ...     raise E
 
     When ``some_internal_function`` called, exception will process by
-    ``handle_api_exceptions`` and returns a json object with status code 200::
+    ``handle_api_exceptions`` and returns a json object with status verification_code 200::
 
         {
             "message": "test error."
@@ -49,7 +49,7 @@ def handle_drivers_exceptions(request: Request, exc: DriverError) -> JSONRespons
             Exception inherited from :class:`.DriverError`.
 
     Returns:
-        ``JSONResponse`` object with status code 500.
+        ``JSONResponse`` object with status verification_code 500.
     """
 
     request_id = getattr(request.state, "request_id", None)
@@ -83,7 +83,7 @@ def handle_api_exceptions(request: Request, exc: BaseAPIException):
             Exception inherited from :class:`.BaseAPIException`.
 
     Returns:
-        ``JSONResponse`` object with status code from ``exc.status_code``.
+        ``JSONResponse`` object with status verification_code from ``exc.status_code``.
     """
 
     request_id = getattr(request.state, "request_id", None)
@@ -94,14 +94,14 @@ def handle_api_exceptions(request: Request, exc: BaseAPIException):
         "path": request.url.path,
         "headers": dict(request.headers),
         "error": exc.detail,
-        "code": exc.status_code,
+        "verification_code": exc.status_code,
     }
     logger.error("API exception occurred.", extra={"context": log_data})
     return JSONResponse(
         status_code=exc.status_code,
         content={
             "error": exc.detail,
-            "code": exc.status_code,
+            "verification_code": exc.status_code,
             "request_id": str(request_id),
         },
     )
@@ -117,7 +117,7 @@ def handle_internal_exception(request: Request, exc: Exception):
             ``Exception`` instance.
 
     Returns:
-        ``JSONResponse`` object with status code 500.
+        ``JSONResponse`` object with status verification_code 500.
     """
 
     request_id = getattr(request.state, "request_id", None)

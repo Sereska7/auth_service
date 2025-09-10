@@ -10,7 +10,10 @@ __all__ = [
     "UserCreateError",
     "UserUpdateError",
     "UserAlreadyExists",
-    "TokenNotFoundError"
+    "TokenNotFoundError",
+    "VerificationCodeExpiredError",
+    "InvalidVerificationPayloadError",
+    "InvalidVerificationCodeError"
 ]
 
 
@@ -54,3 +57,24 @@ class TokenNotFoundError(BaseAPIException):
 
     message = "Token not found."
     status_code = status.HTTP_404_NOT_FOUND
+
+
+class VerificationCodeExpiredError(BaseAPIException):
+    """Exception raised when a verification code is expired or not found in Redis."""
+
+    message = "Verification code has expired or is invalid."
+    status_code = status.HTTP_404_NOT_FOUND
+
+
+class InvalidVerificationPayloadError(BaseAPIException):
+    """Exception raised when the verification payload in Redis is invalid or cannot be decoded."""
+
+    message = "Invalid verification payload."
+    status_code = status.HTTP_400_BAD_REQUEST
+
+
+class InvalidVerificationCodeError(BaseAPIException):
+    """Exception raised when the provided verification code does not match the expected one."""
+
+    message = "Invalid verification code."
+    status_code = status.HTTP_400_BAD_REQUEST

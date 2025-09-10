@@ -18,7 +18,7 @@ class LoggerRoute(APIRoute):
 
     This class wraps the FastAPI route handler to log information about
     incoming requests and outgoing responses. It captures details such
-    as the HTTP method, path, request body, response status code, and
+    as the HTTP method, path, request body, response status verification_code, and
     response body.
     """
 

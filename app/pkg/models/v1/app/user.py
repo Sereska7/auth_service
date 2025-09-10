@@ -17,7 +17,9 @@ __all__ = [
     "ServiceRoleEnum",
     "UserVerifiedEvent",
     "UserResponse",
+    "UserRegisterResponse",
     "UserRegisterCommand",
+    "UserVerifyCommand",
     "UserCreateCommand",
     "UserReadByIDCommand",
     "UserReadByEmailCommand",
@@ -116,8 +118,8 @@ class UserFields:
         description="UUID of the verification record (key in Redis/DB).",
         examples=["4f7f6f6d-91e7-43aa-bb2f-3dcfb6a2edc4"],
     )
-    code: str = Field(
-        description="Six-digit verification code (or a magic link).",
+    verification_code: str = Field(
+        description="Six-digit verification verification_code (or a magic link).",
         examples=["582341"],
         min_length=6,
         max_length=6,
@@ -150,7 +152,7 @@ class UserVerifiedEvent(BaseUser):
     verification_id: UUID = UserFields.verification_id
     user_id: UUID = UserFields.user_id
     email: EmailStr = UserFields.user_email
-    code: str = UserFields.code
+    verification_code: str = UserFields.verification_code
 
 
 class UserResponse(BaseUser):
@@ -164,6 +166,20 @@ class UserResponse(BaseUser):
     user_service_role: ServiceRoleEnum = UserFields.user_service_role
     user_create_at: datetime = UserFields.user_create_at
     user_update_at: datetime | None = UserFields.user_update_at
+
+
+class UserRegisterResponse(BaseUser):
+    """Register response model for a user."""
+
+    user_id: UUID = UserFields.user_id
+    user_email: EmailStr = UserFields.user_email
+    user_name: str = UserFields.user_name
+    user_is_active: bool = UserFields.user_is_active
+    user_is_verified: bool = UserFields.user_is_verified
+    user_service_role: ServiceRoleEnum = UserFields.user_service_role
+    user_create_at: datetime = UserFields.user_create_at
+    user_update_at: datetime | None = UserFields.user_update_at
+    verification_id: UUID = UserFields.verification_id
 
 
 # Command.
@@ -181,6 +197,13 @@ class UserCreateCommand(BaseUser):
     user_email: EmailStr = UserFields.user_email
     user_name: str = UserFields.user_name
     hashed_password: str = UserFields.hashed_password
+
+
+class UserVerifyCommand(BaseUser):
+    """Command model for verifying email ner user."""
+
+    verification_id: UUID = UserFields.verification_id
+    code: str = UserFields.verification_code
 
 
 class UserReadByIDCommand(BaseUser):

@@ -1,13 +1,15 @@
 """Routes for User module."""
+from typing import Any, Coroutine
 
 from dependency_injector.wiring import Provide, inject
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, Response
 
 from app.internal.pkg.dependencies import get_current_user_from_auth
 from app.internal.services import Services
 from app.internal.services.v1 import UserService
 from app.pkg.models import v1 as models
 from app.pkg.models.base.request_id_route import RequestIDRoute
+from app.pkg.models.v1 import UserRegisterResponse
 
 router = APIRouter(prefix="/user", tags=["User"], route_class=RequestIDRoute)
 
@@ -15,7 +17,7 @@ router = APIRouter(prefix="/user", tags=["User"], route_class=RequestIDRoute)
 @router.post(
     "/register",
     status_code=status.HTTP_201_CREATED,
-    response_model=models.UserResponse,
+    response_model=models.UserRegisterResponse,
     description="""
     Description: Create new user.
     Used: Method is used to create user.
@@ -25,8 +27,25 @@ router = APIRouter(prefix="/user", tags=["User"], route_class=RequestIDRoute)
 async def register_user(
     cmd: models.UserRegisterCommand,
     user_service: UserService = Depends(Provide[Services.v1.user_service]),
-) -> models.UserResponse:
+) -> models.UserRegisterResponse:
     return await user_service.register_user(cmd)
+
+
+@router.patch(
+    "/verify",
+    status_code=status.HTTP_204_NO_CONTENT,
+    description="""
+    Description: Verify user email.
+    Used: Method is used to confirm a user's email address with a verification code.
+    """,
+)
+@inject
+async def verify_code(
+    cmd: models.UserVerifyCommand,
+    user_service: UserService = Depends(Provide[Services.v1.user_service]),
+) -> None:
+    await user_service.verify_user_email(cmd)
+
 
 
 @router.patch(

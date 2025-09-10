@@ -1,10 +1,12 @@
 """Models for User object."""
+
 import json
 from datetime import datetime, timezone
 from logging import Logger
 from uuid import uuid4
 
 from passlib.handlers.bcrypt import bcrypt
+from redis import RedisError
 
 from app.internal.pkg.password.password import check_password
 from app.internal.pkg.verification.verification import create_verification_code
@@ -13,6 +15,7 @@ from app.internal.repository.v1 import redis, rabbitmq
 from app.pkg.logger import get_logger
 from app.pkg.models import v1 as models
 from app.pkg.models.v1.exceptions.auth import InvalidCredentials
+from app.pkg.models.v1.exceptions.redis import ErrorRedisRead
 from app.pkg.models.v1.exceptions.repository import (
     DriverError,
     EmptyResult,
@@ -23,6 +26,9 @@ from app.pkg.models.v1.exceptions.user import (
     UserCreateError,
     UserNotFound,
     UserUpdateError,
+    VerificationCodeExpiredError,
+    InvalidVerificationPayloadError,
+    InvalidVerificationCodeError,
 )
 from app.pkg.settings import settings
 
@@ -41,14 +47,14 @@ class UserService:
     async def register_user(
         self,
         cmd: models.UserRegisterCommand,
-    ) -> models.UserResponse:
+    ) -> models.UserRegisterResponse:
         """Registers a new user in the system.
 
         Args:
             cmd (models.UserRegisterCommand): Command object containing user registration data.
 
         Returns:
-            models.UserResponse: The newly created user details.
+            models.UserRegisterResponse: The newly created user details.
         """
 
         try:
@@ -67,7 +73,7 @@ class UserService:
             redis_value = json.dumps(
                 {
                     "user_id": str(user.user_id),
-                    "hash_verification_code": verification_code,
+                    "verification_code": verification_code,
                 }
             )
             await self.redis_repository.create(
@@ -83,16 +89,61 @@ class UserService:
                     verification_id=verification_id,
                     user_id=user.user_id,
                     email=user.user_email,
-                    code=verification_code,
+                    verification_code=verification_code,
                 ),
                 routing_key=settings.RABBITMQ.NOTIFICATION_KEY,
             )
-            return user
+            return user.migrate(
+                model=models.UserRegisterResponse,
+                extra_fields={
+                    "verification_id": verification_id
+                }
+            )
         except UniqueViolation:
             raise UserAlreadyExists
         except DriverError as exc:
             raise UserCreateError from exc
 
+
+    async def verify_user_email(
+        self,
+        cmd: models.UserVerifyCommand
+    ) -> None:
+        """"""
+
+        try:
+            data = await self.redis_repository.read(
+                redis_key=f"verify:{cmd.verification_id}"
+            )
+        except RedisError as exc:
+            self.__logger.exception("Error reading verification entry from Redis.")
+            raise ErrorRedisRead from exc
+
+        if data is None:
+            self.__logger.info("Verification code not found or expired.")
+            raise VerificationCodeExpiredError
+
+        try:
+            code_payload = json.loads(data.decode())
+        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+            self.__logger.exception("Failed to decode verification payload.")
+            raise InvalidVerificationPayloadError from exc
+
+        user_id = code_payload.get("user_id")
+        code = code_payload.get("verification_code")
+
+        if code != cmd.code:
+            self.__logger.info("Verification code mismatch.")
+            raise InvalidVerificationCodeError
+
+        try:
+            await self.user_repository.update_verified(user_id)
+        except EmptyResult as exc:
+            self.__logger.exception("No user found to update verification status.")
+            raise UserNotFound from exc
+        except DriverError as exc:
+            self.__logger.exception("Database error during verification update.")
+            raise UserUpdateError from exc
 
     async def change_password(
         self,

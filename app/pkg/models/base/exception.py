@@ -15,7 +15,7 @@ class BaseAPIException(HTTPException):
         message:
             Message of exception.
         status_code:
-            Status code of exception.
+            Status verification_code of exception.
 
     Examples:
         Before using this class, you must create your own exception class.
@@ -27,7 +27,7 @@ class BaseAPIException(HTTPException):
             ...     message = "My exception"
             ...     status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
 
-        After that, you can use it in your code in some function run under fastapi::
+        After that, you can use it in your verification_code in some function run under fastapi::
 
             >>> async def my_func():
             ...     raise MyException

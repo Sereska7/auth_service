@@ -50,6 +50,33 @@ async def login(
 
 
 @router.post(
+    "/logout",
+    status_code=status.HTTP_200_OK,
+    description="""
+    Description: Refreshes the access and refresh tokens using the refresh token cookie.
+    Usage: Issues new tokens to the user if the provided refresh token is valid.
+    """,
+)
+@inject
+async def logout(
+    response: Response,
+) -> dict:
+    response.delete_cookie(
+        key="access_token",
+        httponly=True,
+        secure=True,
+        samesite="lax",
+    )
+    response.delete_cookie(
+        key="refresh_token",
+        httponly=True,
+        secure=True,
+        samesite="lax",
+    )
+    return {"msg": "Successfully logged out"}
+
+
+@router.post(
     "/refresh",
     status_code=status.HTTP_200_OK,
     response_model=models.TokenResponse,
@@ -88,30 +115,3 @@ async def refresh_tokens(
     )
 
     return tokens
-
-
-@router.post(
-    "/logout",
-    status_code=status.HTTP_200_OK,
-    description="""
-    Description: Refreshes the access and refresh tokens using the refresh token cookie.
-    Usage: Issues new tokens to the user if the provided refresh token is valid.
-    """,
-)
-@inject
-async def logout(
-    response: Response,
-) -> dict:
-    response.delete_cookie(
-        key="access_token",
-        httponly=True,
-        secure=True,
-        samesite="lax",
-    )
-    response.delete_cookie(
-        key="refresh_token",
-        httponly=True,
-        secure=True,
-        samesite="lax",
-    )
-    return {"msg": "Successfully logged out"}

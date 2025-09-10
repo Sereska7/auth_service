@@ -1,9 +1,7 @@
 """Models for Auth object."""
 
 from logging import Logger
-
 from jose import jwt
-
 from app.internal.pkg.jwt.jwt_handler import JWTHandler
 from app.internal.pkg.password.password import check_password
 from app.internal.repository.v1.postgresql.user import UserRepository
