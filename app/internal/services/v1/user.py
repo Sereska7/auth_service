@@ -18,7 +18,7 @@ from app.pkg.logger import get_logger
 from app.pkg.models import v1 as models
 from app.pkg.models.v1.exceptions.auth import InvalidCredentials
 from app.pkg.models.v1.exceptions.rabbitmq import ErrorPublishToRabbitMQ
-from app.pkg.models.v1.exceptions.redis import ErrorRedisRead, ErrorRedisCreate
+from app.pkg.models.v1.exceptions.redis import ErrorRedisCreate, ErrorRedisRead
 from app.pkg.models.v1.exceptions.repository import (
     DriverError,
     EmptyResult,
@@ -60,6 +60,7 @@ class UserService:
 
         Returns:
             models.UserRegisterResponse: The newly created user details.
+
         """
 
         try:
@@ -121,12 +122,16 @@ class UserService:
             extra_fields={"verification_id": verification_id},
         )
 
-    async def verify_user_email(self, cmd: models.UserVerifyCommand) -> None:
+    async def verify_user_email(
+        self,
+        cmd: models.UserVerifyCommand
+    ) -> models.UserResponse:
         """
         Verifies a user's email address by checking the provided verification code.
 
         Args:
             cmd (models.UserVerifyCommand): Command object containing the verification ID and code.
+
         """
 
         try:
@@ -155,13 +160,23 @@ class UserService:
             raise InvalidVerificationCodeError
 
         try:
-            await self.user_repository.update_verified(user_id)
+            user = await self.user_repository.update_verified(user_id)
         except EmptyResult as exc:
             self.__logger.exception("No user found to update verification status.")
             raise UserNotFound from exc
         except DriverError as exc:
             self.__logger.exception("Database error during verification update.")
             raise UserUpdateError from exc
+
+        try:
+            await self.redis_repository.delete(
+                redis_key=f"verify:{cmd.verification_id}",
+            )
+        except RedisError as exc:
+            self.__logger.exception("Error deleting verification entry from Redis.")
+            raise ErrorRedisRead from exc
+
+        return user
 
     async def change_password(
         self,

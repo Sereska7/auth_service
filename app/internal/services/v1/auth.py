@@ -3,7 +3,8 @@ Models for Auth object.
 """
 
 from logging import Logger
-
+from uuid import UUID
+from fastapi import Response
 from jose import jwt
 
 from app.internal.pkg.jwt.jwt_handler import JWTHandler
@@ -34,6 +35,28 @@ class AuthService:
     jwt_handler: JWTHandler
     __logger: Logger = get_logger(__name__)
 
+    async def issue_tokens(self, user_id: UUID) -> models.TokenResponse:
+        """
+        Issues a new pair of access and refresh tokens for the given user.
+
+        Args:
+            user_id (UUID): The ID of the user.
+
+        Returns:
+            models.TokenResponse: Contains access token, refresh token, and metadata.
+        """
+        access_token = self.jwt_handler.create_access_token(
+            {"user_id": str(user_id)},
+        )
+        refresh_token = self.jwt_handler.create_refresh_token(
+            {"user_id": str(user_id)},
+        )
+        return models.TokenResponse(
+            access_token=access_token,
+            refresh_token=refresh_token,
+            token_type="bearer",
+        )
+
     async def authenticate_user(self, cmd: models.AuthCommand) -> models.TokenResponse:
         """
         Authenticates a user using email and password, then returns access and refresh tokens.
@@ -42,10 +65,14 @@ class AuthService:
             cmd (models.AuthCommand): Command object containing user credentials (email and password).
 
         Returns:
-            models.TokenResponse: Contains access token, refresh token, and token type.
+            models.TokenResponse: Contains access token, refresh token, and metadata.
 
+        Raises:
+            UserNotFound: If no user with the given email exists.
+            UserReadError: If there is a database error.
+            InvalidCredentials: If the password does not match.
+            UserInactive: If the user account is inactive.
         """
-
         try:
             user = await self.user_repository.get_user_by_email(cmd)
         except EmptyResult:
@@ -62,18 +89,7 @@ class AuthService:
         if not user.user_is_active:
             raise UserInactive
 
-        access_token = self.jwt_handler.create_access_token(
-            {"user_id": str(user.user_id)},
-        )
-        refresh_token = self.jwt_handler.create_refresh_token(
-            {"user_id": str(user.user_id)},
-        )
-
-        return models.TokenResponse(
-            access_token=access_token,
-            refresh_token=refresh_token,
-            token_type="bearer",
-        )
+        return await self.issue_tokens(user.user_id)
 
     async def refresh_access_token(self, refresh_token: str) -> models.TokenResponse:
         """
@@ -140,3 +156,23 @@ class AuthService:
             raise UserReadError from exc
         except EmptyResult as exc:
             raise UserNotFound from exc
+
+    @staticmethod
+    def set_token_cookies(response: Response, tokens: models.TokenResponse) -> None:
+        """Set access and refresh tokens in HTTP-only cookies."""
+        response.set_cookie(
+            key="access_token",
+            value=tokens.access_token,
+            httponly=True,
+            max_age=3600,
+            secure=True,
+            samesite="lax",
+        )
+        response.set_cookie(
+            key="refresh_token",
+            value=tokens.refresh_token,
+            httponly=True,
+            max_age=14 * 24 * 3600,
+            secure=True,
+            samesite="lax",
+        )

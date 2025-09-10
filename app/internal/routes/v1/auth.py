@@ -4,7 +4,6 @@ Routes for Auth module.
 
 from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Response, status
-
 from app.internal.services import Services
 from app.internal.services.v1 import AuthService
 from app.pkg.models import v1 as models
@@ -29,23 +28,9 @@ async def login(
     auth_service: AuthService = Depends(Provide[Services.v1.auth_service]),
 ) -> models.TokenResponse:
     tokens = await auth_service.authenticate_user(cmd)
-
-    response.set_cookie(
-        key="access_token",
-        value=tokens.access_token,
-        httponly=True,
-        max_age=3600,
-        secure=True,
-        samesite="lax",
-    )
-
-    response.set_cookie(
-        key="refresh_token",
-        value=tokens.refresh_token,
-        httponly=True,
-        max_age=14 * 24 * 3600,
-        secure=True,
-        samesite="lax",
+    auth_service.set_token_cookies(
+        response=response,
+        tokens=tokens
     )
 
     return tokens
@@ -99,21 +84,9 @@ async def refresh_tokens(
 
     tokens = await auth_service.refresh_access_token(refresh_token)
 
-    response.set_cookie(
-        key="access_token",
-        value=tokens.access_token,
-        httponly=True,
-        max_age=3600,
-        secure=True,
-        samesite="lax",
-    )
-    response.set_cookie(
-        key="refresh_token",
-        value=tokens.refresh_token,
-        httponly=True,
-        max_age=14 * 24 * 3600,
-        secure=True,
-        samesite="lax",
+    auth_service.set_token_cookies(
+        response=response,
+        tokens=tokens
     )
 
     return tokens
