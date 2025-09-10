@@ -1,4 +1,6 @@
-"""Exceptions for user."""
+"""
+Exceptions for user.
+"""
 
 from starlette import status
 

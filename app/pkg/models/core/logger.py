@@ -1,4 +1,6 @@
-"""LoggerLevel model."""
+"""
+LoggerLevel model.
+"""
 
 from app.pkg.models.base import BaseEnum
 

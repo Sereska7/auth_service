@@ -1,4 +1,6 @@
-"""Container with rabbitmq connector."""
+"""
+Container with rabbitmq connector.
+"""
 
 from dependency_injector import containers, providers
 
@@ -9,7 +11,9 @@ __all__ = ["RabbitMQContainer"]
 
 
 class RabbitMQContainer(containers.DeclarativeContainer):
-    """Declarative container with rabbitmq connector."""
+    """
+    Declarative container with rabbitmq connector.
+    """
 
     configuration = providers.Configuration()
     configuration.from_dict(settings.model_dump())

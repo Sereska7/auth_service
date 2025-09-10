@@ -1,4 +1,6 @@
-"""Custom types with JSON encoders for specific types."""
+"""
+Custom types with JSON encoders for specific types.
+"""
 
 from datetime import date, datetime
 from typing import Annotated

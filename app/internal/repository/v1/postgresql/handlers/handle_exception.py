@@ -1,4 +1,6 @@
-"""Handle Postgresql Query Exceptions."""
+"""
+Handle Postgresql Query Exceptions.
+"""
 
 from typing import Any, Callable, Coroutine
 
@@ -14,7 +16,9 @@ logger = get_logger(__name__)
 def handle_exception(
     func: Callable[..., Model],
 ) -> Callable[[tuple[object, ...], dict[str, object]], Coroutine[Any, Any, Model]]:
-    """Decorator catching SQLAlchemy async exceptions."""
+    """
+    Decorator catching SQLAlchemy async exceptions.
+    """
 
     async def wrapper(*args: object, **kwargs: object) -> Model:
         try:

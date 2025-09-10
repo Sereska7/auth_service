@@ -1,7 +1,9 @@
-"""Logger middleware for tracking incoming requests and outgoing responses.
+"""
+Logger middleware for tracking incoming requests and outgoing responses.
 
 This module provides a `LoggerRoute` class that wraps API route handlers
 to log request and response details for internal microservices.
+
 """
 
 import json
@@ -14,27 +16,32 @@ from app.pkg.logger import logger
 
 
 class LoggerRoute(APIRoute):
-    """Middleware to log details of requests and responses.
+    """
+    Middleware to log details of requests and responses.
 
-    This class wraps the FastAPI route handler to log information about
-    incoming requests and outgoing responses. It captures details such
-    as the HTTP method, path, request body, response status verification_code, and
-    response body.
+    This class wraps the FastAPI route handler to log information about incoming requests and
+    outgoing responses. It captures details such as the HTTP method, path, request body, response
+    status verification_code, and response body.
+
     """
 
     def __init__(self, *args, **kwargs):
-        """Initialize the LoggerRoute class."""
+        """
+        Initialize the LoggerRoute class.
+        """
         super().__init__(*args, **kwargs)
 
     @staticmethod
     async def parse_request_data(request: Request) -> dict:
-        """Parse the request body into a dictionary.
+        """
+        Parse the request body into a dictionary.
 
         Args:
             request (Request): The incoming HTTP request.
 
         Returns:
             dict: The parsed request body, or an empty dictionary if parsing fails.
+
         """
         try:
             body = await request.body()
@@ -46,12 +53,14 @@ class LoggerRoute(APIRoute):
 
     @staticmethod
     async def log_request(request: Request, data: dict, log):
-        """Log details of the incoming request.
+        """
+        Log details of the incoming request.
 
         Args:
             request (Request): The incoming HTTP request.
             data (dict): The parsed request body.
             log (Logger): The logger instance used for logging.
+
         """
         request_id = getattr(request.state, "request_id", None)
 
@@ -74,13 +83,15 @@ class LoggerRoute(APIRoute):
         request_data: dict,
         log,
     ):
-        """Log details of the outgoing response.
+        """
+        Log details of the outgoing response.
 
         Args:
             request (Request): The original HTTP request.
             response (Response): The HTTP response returned by the route handler.
             request_data (dict): The parsed request body.
             log (Logger): The logger instance used for logging.
+
         """
         request_id = getattr(request.state, "request_id", None)
         response_data = await self.parse_response_data(response)
@@ -101,13 +112,15 @@ class LoggerRoute(APIRoute):
 
     @staticmethod
     async def parse_response_data(response: Response) -> dict:
-        """Parse the response body into a dictionary.
+        """
+        Parse the response body into a dictionary.
 
         Args:
             response (Response): The HTTP response.
 
         Returns:
             dict: The parsed response body, or an empty dictionary if parsing fails.
+
         """
         try:
             if response.body:
@@ -117,21 +130,25 @@ class LoggerRoute(APIRoute):
         return {}
 
     def get_route_handler(self) -> Callable:
-        """Wrap the original route handler to add logging.
+        """
+        Wrap the original route handler to add logging.
 
         Returns:
             Callable: The customized route handler with logging functionality.
+
         """
         original_route_handler = super().get_route_handler()
 
         async def custom_route_handler(request: Request) -> Response:
-            """Custom route handler that logs request and response details.
+            """
+            Custom route handler that logs request and response details.
 
             Args:
                 request (Request): The incoming HTTP request.
 
             Returns:
                 Response: The HTTP response after processing the request.
+
             """
             log = logger.get_logger(name=request.url.path)
             request_data = await self.parse_request_data(request)

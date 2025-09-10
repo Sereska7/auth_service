@@ -1,4 +1,6 @@
-"""All postgresql repositories are defined here."""
+"""
+All postgresql repositories are defined here.
+"""
 
 from dependency_injector import containers, providers
 
@@ -6,6 +8,8 @@ from app.internal.repository.v1.postgresql.user import UserRepository
 
 
 class Repositories(containers.DeclarativeContainer):
-    """Container for postgresql repositories."""
+    """
+    Container for postgresql repositories.
+    """
 
     user_repository = providers.Factory(UserRepository)

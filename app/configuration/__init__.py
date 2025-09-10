@@ -1,4 +1,5 @@
-"""Collect or build all requirements for startup server.
+"""
+Collect or build all requirements for startup server.
 
 In this module, you can add all your middlewares, routes, dependencies,
 etc.
@@ -17,6 +18,7 @@ Examples:
         >>> from fastapi import FastAPI
         >>> app = FastAPI()
         >>> __containers__.wire_packages(app=app)
+
 """
 
 from app.internal.services import Services

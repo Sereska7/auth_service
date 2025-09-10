@@ -1,4 +1,6 @@
-"""Async resource for PostgresSQL connector."""
+"""
+Async resource for PostgresSQL connector.
+"""
 
 from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker, create_async_engine
 
@@ -8,14 +10,17 @@ __all__ = ["Postgresql"]
 
 
 class Postgresql(BaseAsyncResource):
-    """PostgreSQL connector using SQLAlchemy async engine."""
+    """
+    PostgreSQL connector using SQLAlchemy async engine.
+    """
 
     def __init__(self):
         self.engine: AsyncEngine | None = None
         self.async_session: async_sessionmaker | None = None
 
     async def init(self, dsn: str, *args: tuple, **kwargs: dict) -> AsyncEngine:
-        """Initialize asynchronous SQLAlchemy engine.
+        """
+        Initialize asynchronous SQLAlchemy engine.
 
         Args:
             dsn: Database connection string. Example:
@@ -23,6 +28,7 @@ class Postgresql(BaseAsyncResource):
 
         Returns:
             AsyncEngine instance.
+
         """
 
         self.engine = create_async_engine(dsn, *args, **kwargs)
@@ -30,6 +36,8 @@ class Postgresql(BaseAsyncResource):
         return self.engine
 
     async def shutdown(self, resource: AsyncEngine):
-        """Dispose SQLAlchemy engine on shutdown."""
+        """
+        Dispose SQLAlchemy engine on shutdown.
+        """
 
         await resource.dispose()

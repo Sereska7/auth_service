@@ -1,4 +1,6 @@
-"""Exceptions for repository layer."""
+"""
+Exceptions for repository layer.
+"""
 
 from fastapi import status
 
@@ -23,17 +25,21 @@ class EmptyResult(BaseAPIException):
 
 
 class DriverError(BaseAPIException):
-    """Exception for internal driver errors."""
+    """
+    Exception for internal driver errors.
+    """
 
     message = "Internal driver error."
     status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
     error_details: str = None
 
     def __init__(self, error_details: str = None):
-        """In case of message is None, a default message will be used.
+        """
+        In case of message is None, a default message will be used.
 
         Args:
             details: Details of exception raised from driver.
+
         """
 
         if error_details:

@@ -1,4 +1,6 @@
-"""Container with Redis connector."""
+"""
+Container with Redis connector.
+"""
 
 from dependency_injector import containers, providers
 
@@ -9,7 +11,9 @@ __all__ = ["RedisContainer"]
 
 
 class RedisContainer(containers.DeclarativeContainer):
-    """Declarative container with Redis connector."""
+    """
+    Declarative container with Redis connector.
+    """
 
     configuration = providers.Configuration(name="settings")
     configuration.from_dict(settings.model_dump())

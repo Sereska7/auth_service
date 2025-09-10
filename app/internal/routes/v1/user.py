@@ -1,15 +1,15 @@
-"""Routes for User module."""
-from typing import Any, Coroutine
+"""
+Routes for User module.
+"""
 
 from dependency_injector.wiring import Provide, inject
-from fastapi import APIRouter, Depends, status, Response
+from fastapi import APIRouter, Depends, status
 
 from app.internal.pkg.dependencies import get_current_user_from_auth
 from app.internal.services import Services
 from app.internal.services.v1 import UserService
 from app.pkg.models import v1 as models
 from app.pkg.models.base.request_id_route import RequestIDRoute
-from app.pkg.models.v1 import UserRegisterResponse
 
 router = APIRouter(prefix="/user", tags=["User"], route_class=RequestIDRoute)
 
@@ -45,7 +45,6 @@ async def verify_code(
     user_service: UserService = Depends(Provide[Services.v1.user_service]),
 ) -> None:
     await user_service.verify_user_email(cmd)
-
 
 
 @router.patch(

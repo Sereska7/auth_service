@@ -1,4 +1,6 @@
-"""All connectors in declarative container."""
+"""
+All connectors in declarative container.
+"""
 
 from dependency_injector import containers, providers
 
@@ -10,7 +12,9 @@ __all__ = [
 
 
 class Clients(containers.DeclarativeContainer):
-    """Declarative container with clients."""
+    """
+    Declarative container with clients.
+    """
 
     configuration = providers.Configuration(name="settings")
     configuration.from_dict(settings.model_dump())

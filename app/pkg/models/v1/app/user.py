@@ -1,4 +1,6 @@
-"""User models."""
+"""
+User models.
+"""
 
 from datetime import datetime
 from enum import Enum
@@ -31,18 +33,24 @@ __all__ = [
 
 
 class ServiceRoleEnum(Enum):
-    """Enum for service roles."""
+    """
+    Enum for service roles.
+    """
 
     ADMIN = "ADMIN"
     USER = "USER"
 
 
 class BaseUser(BaseModel):
-    """Base model for User."""
+    """
+    Base model for User.
+    """
 
 
 class UserFields:
-    """User fields."""
+    """
+    User fields.
+    """
 
     user_id: UUID = Field(
         description="Unique identifier of the user.",
@@ -130,7 +138,9 @@ OptionalFolderFields = create_optional_fields_class(UserFields)
 
 
 class User(BaseUser):
-    """User model."""
+    """
+    User model.
+    """
 
     user_id: UUID = UserFields.user_id
     user_email: EmailStr = UserFields.user_email
@@ -144,7 +154,7 @@ class User(BaseUser):
 
 
 class UserVerifiedEvent(BaseUser):
-    """"""
+    """ """
 
     event: str = UserFields.event
     event_id: UUID = UserFields.event_id
@@ -156,7 +166,9 @@ class UserVerifiedEvent(BaseUser):
 
 
 class UserResponse(BaseUser):
-    """Response model for a user."""
+    """
+    Response model for a user.
+    """
 
     user_id: UUID = UserFields.user_id
     user_email: EmailStr = UserFields.user_email
@@ -169,7 +181,9 @@ class UserResponse(BaseUser):
 
 
 class UserRegisterResponse(BaseUser):
-    """Register response model for a user."""
+    """
+    Register response model for a user.
+    """
 
     user_id: UUID = UserFields.user_id
     user_email: EmailStr = UserFields.user_email
@@ -184,7 +198,9 @@ class UserRegisterResponse(BaseUser):
 
 # Command.
 class UserRegisterCommand(BaseUser):
-    """Command model for register new user."""
+    """
+    Command model for register new user.
+    """
 
     user_email: EmailStr = UserFields.user_email
     user_name: str = UserFields.user_name
@@ -192,7 +208,9 @@ class UserRegisterCommand(BaseUser):
 
 
 class UserCreateCommand(BaseUser):
-    """Command model for creating new user."""
+    """
+    Command model for creating new user.
+    """
 
     user_email: EmailStr = UserFields.user_email
     user_name: str = UserFields.user_name
@@ -200,46 +218,58 @@ class UserCreateCommand(BaseUser):
 
 
 class UserVerifyCommand(BaseUser):
-    """Command model for verifying email ner user."""
+    """
+    Command model for verifying email ner user.
+    """
 
     verification_id: UUID = UserFields.verification_id
     code: str = UserFields.verification_code
 
 
 class UserReadByIDCommand(BaseUser):
-    """Command model for reading a user by their ID."""
+    """
+    Command model for reading a user by their ID.
+    """
 
     user_id: UUID = UserFields.user_id
 
 
 class UserReadByEmailCommand(BaseUser):
-    """Command model for reading a user by their email."""
+    """
+    Command model for reading a user by their email.
+    """
 
     user_email: EmailStr = UserFields.user_email
 
 
 class UserChangePasswordCommand(BaseUser):
-    """Command model for changing the user's password."""
+    """
+    Command model for changing the user's password.
+    """
 
     old_password: EncryptedSecretBytes = UserFields.old_password
     new_password: str = UserFields.new_password
 
 
 class UserPasswordUpdateCommand(BaseUser):
-    """Command model for updating the user's password."""
+    """
+    Command model for updating the user's password.
+    """
 
     user_id: UUID = UserFields.user_id
     hash_password: str = UserFields.hashed_password
 
 
 class UserChangeDataCommand(BaseUser):
-    """"""
+    """ """
 
     new_user_name: str = UserFields.user_name
 
 
 class UserUpdateDataCommand(BaseUser):
-    """Command model for updating user data."""
+    """
+    Command model for updating user data.
+    """
 
     user_id: UUID = UserFields.user_id
     new_user_name: str = UserFields.user_name

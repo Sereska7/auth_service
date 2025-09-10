@@ -1,4 +1,6 @@
-"""Types for FastAPI application."""
+"""
+Types for FastAPI application.
+"""
 
 from typing import TypeVar
 

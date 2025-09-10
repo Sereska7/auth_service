@@ -1,4 +1,6 @@
-"""Singleton type for models."""
+"""
+Singleton type for models.
+"""
 
 __all__ = ["SingletonMeta"]
 
@@ -42,8 +44,10 @@ class SingletonMeta(type):
     _instances: dict[type, object] = {}
 
     def __call__(cls, *args: tuple, **kwargs: dict) -> object:
-        """Possible changes to the value of the `__init__` argument do not
-        affect the returned instance."""
+        """
+        Possible changes to the value of the `__init__` argument do not affect the returned
+        instance.
+        """
         if cls not in cls._instances:
             instance = super().__call__(*args, **kwargs)
             cls._instances[cls] = instance

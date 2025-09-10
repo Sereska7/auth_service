@@ -1,4 +1,6 @@
-"""Clients exceptions."""
+"""
+Clients exceptions.
+"""
 
 from starlette import status
 

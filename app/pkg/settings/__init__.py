@@ -1,4 +1,6 @@
-"""Global point to cached settings."""
+"""
+Global point to cached settings.
+"""
 
 from .settings import Settings, get_settings
 

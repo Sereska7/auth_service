@@ -1,6 +1,8 @@
-"""Package resource's module.
+"""
+Package resource's module.
 
 All resources should be inherited from :class:`.BaseAsyncResource`.
+
 """
 
 from abc import abstractmethod
@@ -14,11 +16,14 @@ _T = TypeVar("_T")
 
 
 class BaseAsyncResource(resources.AsyncResource):
-    """Abstract base class for async resources."""
+    """
+    Abstract base class for async resources.
+    """
 
     @abstractmethod
     async def init(self, *args: object, **kwargs: object) -> _T:
-        """Getting connection.
+        """
+        Getting connection.
 
         Args:
             *args: Positional arguments for ``get_connect`` method.
@@ -62,15 +67,18 @@ class BaseAsyncResource(resources.AsyncResource):
                 ...     async with acquire_connection(pool=psql) as cur:
                 ...         await cur.execute("SELECT '1'")
                 ...         return await cur.fetchone()
+
         """
 
     @abstractmethod
     async def shutdown(self, resource: _T) -> None:
-        """Close connection.
+        """
+        Close connection.
 
         Args:
             resource: Resource returned by :meth:`BaseAsyncResource.init()` method.
 
         Notes:
             You should implement ``close`` method of your connector here.
+
         """

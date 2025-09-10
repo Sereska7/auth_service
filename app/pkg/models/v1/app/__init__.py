@@ -1,1 +1,3 @@
-"""Models for application abstraction."""
+"""
+Models for application abstraction.
+"""

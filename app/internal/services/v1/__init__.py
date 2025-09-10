@@ -1,9 +1,11 @@
-"""V1 service layer."""
+"""
+V1 service layer.
+"""
 
 from dependency_injector import containers, providers
 
 from app.internal.repository import Repositories
-from app.internal.repository.v1 import jwt, postgresql, redis, rabbitmq
+from app.internal.repository.v1 import jwt, postgresql, rabbitmq, redis
 from app.internal.services.v1.auth import AuthService
 from app.internal.services.v1.user import UserService
 from app.pkg.clients import Clients
@@ -11,7 +13,9 @@ from app.pkg.settings import settings
 
 
 class Services(containers.DeclarativeContainer):
-    """Containers with services."""
+    """
+    Containers with services.
+    """
 
     configuration = providers.Configuration(name="settings")
     configuration.from_dict(settings.model_dump())

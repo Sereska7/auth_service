@@ -1,4 +1,6 @@
-"""Server configuration."""
+"""
+Server configuration.
+"""
 
 from fastapi import FastAPI
 
@@ -16,22 +18,26 @@ __all__ = ["Server"]
 
 
 class Server:
-    """Register all requirements for the correct work of server instance.
+    """
+    Register all requirements for the correct work of server instance.
 
     Attributes:
         __app:
             ``FastAPI`` application instance.
+
     """
 
     __app: FastAPI
 
     def __init__(self, app: FastAPI):
-        """Initialize server instance. Register all requirements for the
-        correct work of server instance.
+        """
+        Initialize server instance. Register all requirements for the correct work of server
+        instance.
 
         Args:
             app:
                 ``FastAPI`` application instance.
+
         """
 
         self.__app = app
@@ -39,16 +45,19 @@ class Server:
         self._register_http_exceptions(app)
 
     def get_app(self) -> FastAPI:
-        """Getter of the current application instance.
+        """
+        Getter of the current application instance.
 
         Returns:
             ``FastAPI`` application instance.
+
         """
         return self.__app
 
     @staticmethod
     def _register_routes(app: FastAPITypes.instance) -> None:
-        """Include routers in ``FastAPI`` instance from ``__routes__``.
+        """
+        Include routers in ``FastAPI`` instance from ``__routes__``.
 
         Args:
             app:
@@ -56,13 +65,15 @@ class Server:
 
         Returns:
             None
+
         """
 
         __routes__.register_routes(app)
 
     @staticmethod
     def _register_http_exceptions(app: FastAPITypes.instance) -> None:
-        """Register http exceptions.
+        """
+        Register http exceptions.
 
         instance handle ``BaseApiExceptions`` raises inside functions.
 
@@ -72,6 +83,7 @@ class Server:
 
         Returns:
             None
+
         """
 
         app.add_exception_handler(BaseAPIException, handle_api_exceptions)

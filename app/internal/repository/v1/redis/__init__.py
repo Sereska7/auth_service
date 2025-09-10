@@ -1,4 +1,6 @@
-"""Redis repositories module."""
+"""
+Redis repositories module.
+"""
 
 from dependency_injector import containers, providers
 

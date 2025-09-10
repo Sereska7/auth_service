@@ -1,12 +1,13 @@
-"""Module for load settings form `.env` or if server running with parameter
-`dev` from `.env.dev`"""
+"""
+Module for load settings form `.env` or if server running with parameter `dev` from `.env.dev`
+"""
 
 import urllib.parse
 from functools import lru_cache
 from typing import Literal
 
 from dotenv import find_dotenv
-from pydantic import PostgresDsn, RedisDsn, model_validator, AmqpDsn
+from pydantic import AmqpDsn, PostgresDsn, RedisDsn, model_validator
 from pydantic.types import PositiveInt, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -16,7 +17,8 @@ __all__ = ["Settings", "get_settings"]
 
 
 class _Settings(BaseSettings):
-    """Base settings for all settings.
+    """
+    Base settings for all settings.
 
     Use double underscore for nested env variables.
 
@@ -45,6 +47,7 @@ class _Settings(BaseSettings):
 
     See Also:
         https://docs.pydantic.dev/latest/usage/pydantic_settings/
+
     """
 
     model_config = SettingsConfigDict(
@@ -58,7 +61,9 @@ class _Settings(BaseSettings):
 
 
 class Postgresql(_Settings):
-    """Postgresql settings."""
+    """
+    Postgresql settings.
+    """
 
     #: str: Postgresql host.
     HOST: str = "localhost"
@@ -85,7 +90,9 @@ class Postgresql(_Settings):
     @model_validator(mode="before")
     @classmethod
     def build_dsn(cls, data: dict) -> dict:
-        """Build DSNs for async SQLAlchemy (postgresql+asyncpg)."""
+        """
+        Build DSNs for async SQLAlchemy (postgresql+asyncpg).
+        """
 
         password = urllib.parse.quote_plus(data.get("PASSWORD"))
 
@@ -115,7 +122,9 @@ class Postgresql(_Settings):
 
 
 class RabbitMQ(_Settings):
-    """RabbitMQ settings."""
+    """
+    RabbitMQ settings.
+    """
 
     #: str: Resource host.
     HOST: str = "localhost"
@@ -150,7 +159,9 @@ class RabbitMQ(_Settings):
 
 
 class Redis(_Settings):
-    """Redis settings."""
+    """
+    Redis settings.
+    """
 
     HOST: str = "localhost"
     PORT: PositiveInt = 6379
@@ -161,7 +172,8 @@ class Redis(_Settings):
     @model_validator(mode="before")
     @classmethod
     def build_dsn(cls, values: dict) -> dict:
-        """Build DSN for postgresql.
+        """
+        Build DSN for postgresql.
 
         Args:
             values: dict with all settings.
@@ -172,6 +184,7 @@ class Redis(_Settings):
 
         Returns:
             dict with all settings and DSN.
+
         """
 
         values["DSN"] = str(
@@ -187,14 +200,18 @@ class Redis(_Settings):
 
 
 class Logging(_Settings):
-    """Logging settings."""
+    """
+    Logging settings.
+    """
 
     #: StrictStr: Level of logging which outs in std
     LEVEL: LoggerLevel = LoggerLevel.DEBUG
 
 
 class APIServer(_Settings):
-    """API settings."""
+    """
+    API settings.
+    """
 
     # --- API SETTINGS ---
     #: str: API host.
@@ -215,7 +232,9 @@ class APIServer(_Settings):
 
 
 class JWTSettings(_Settings):
-    """JWT (token) security settings."""
+    """
+    JWT (token) security settings.
+    """
 
     #: SecretStr: Secret key used to encode and decode JWT tokens
     SECRET_KEY: SecretStr = SecretStr("super-secret")
@@ -236,10 +255,12 @@ class JWTSettings(_Settings):
 
 
 class Settings(_Settings):
-    """Server settings.
+    """
+    Server settings.
 
     Formed from `.env` or `.env.dev` if server running with parameter
     `dev`.
+
     """
 
     #: APIServer: API settings. Contains all settings for API.
@@ -260,6 +281,8 @@ class Settings(_Settings):
 
 @lru_cache
 def get_settings(env_file: str = ".env") -> Settings:
-    """Create settings instance."""
+    """
+    Create settings instance.
+    """
 
     return Settings(_env_file=find_dotenv(env_file))

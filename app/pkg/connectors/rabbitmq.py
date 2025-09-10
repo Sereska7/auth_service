@@ -1,4 +1,6 @@
-"""Rabbit connector."""
+"""
+Rabbit connector.
+"""
 
 from contextlib import asynccontextmanager
 
@@ -12,7 +14,9 @@ __all__ = ["RabbitMQ"]
 
 
 class RabbitMQ(BaseConnector):
-    """RabbitMQ connector."""
+    """
+    RabbitMQ connector.
+    """
 
     _username: str
     _password: str
@@ -32,27 +36,29 @@ class RabbitMQ(BaseConnector):
         self._port = port
 
     def get_dsn(self):
-        """Description of ``BaseConnector.get_dsn``."""
-        return (
-            f"amqp://"
-            f"{self._username}:{self._password}@"
-            f"{self._host}:{self._port}/"
-        )
+        """
+        Description of ``BaseConnector.get_dsn``.
+        """
+        return f"amqp://" f"{self._username}:{self._password}@" f"{self._host}:{self._port}/"
 
     async def get_connection(self) -> AbstractRobustConnection:
-        """Return connection to RabbitMQ.
+        """
+        Return connection to RabbitMQ.
 
         Returns:
             AbstractRobustConnection: Connection to RabbitMQ.
+
         """
         return await aio_pika.connect_robust(self.get_dsn())
 
     @asynccontextmanager
     async def get_connect(self) -> aio_pika.Channel:
-        """Get connection to RabbitMQ.
+        """
+        Get connection to RabbitMQ.
 
         Returns:
             aio_pika.Channel: Connection to RabbitMQ.
+
         """
         connection = await self.get_connection()
 

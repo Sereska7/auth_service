@@ -1,4 +1,6 @@
-"""Routes for Auth module."""
+"""
+Routes for Auth module.
+"""
 
 from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Response, status

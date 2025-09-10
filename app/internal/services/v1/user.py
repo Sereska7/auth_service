@@ -1,4 +1,6 @@
-"""Models for User object."""
+"""
+Models for User object.
+"""
 
 import json
 from datetime import datetime, timezone
@@ -10,34 +12,36 @@ from redis import RedisError
 
 from app.internal.pkg.password.password import check_password
 from app.internal.pkg.verification.verification import create_verification_code
+from app.internal.repository.v1 import rabbitmq, redis
 from app.internal.repository.v1.postgresql.user import UserRepository
-from app.internal.repository.v1 import redis, rabbitmq
 from app.pkg.logger import get_logger
 from app.pkg.models import v1 as models
 from app.pkg.models.v1.exceptions.auth import InvalidCredentials
-from app.pkg.models.v1.exceptions.redis import ErrorRedisRead
+from app.pkg.models.v1.exceptions.rabbitmq import ErrorPublishToRabbitMQ
+from app.pkg.models.v1.exceptions.redis import ErrorRedisRead, ErrorRedisCreate
 from app.pkg.models.v1.exceptions.repository import (
     DriverError,
     EmptyResult,
     UniqueViolation,
 )
 from app.pkg.models.v1.exceptions.user import (
+    InvalidVerificationCodeError,
+    InvalidVerificationPayloadError,
     UserAlreadyExists,
     UserCreateError,
     UserNotFound,
     UserUpdateError,
     VerificationCodeExpiredError,
-    InvalidVerificationPayloadError,
-    InvalidVerificationCodeError,
 )
 from app.pkg.settings import settings
 
 __all__ = ["UserService"]
 
 
-
 class UserService:
-    """User service class."""
+    """
+    User service class.
+    """
 
     user_repository: UserRepository
     redis_repository: redis.BaseRedisRepository
@@ -48,7 +52,8 @@ class UserService:
         self,
         cmd: models.UserRegisterCommand,
     ) -> models.UserRegisterResponse:
-        """Registers a new user in the system.
+        """
+        Registers a new user in the system.
 
         Args:
             cmd (models.UserRegisterCommand): Command object containing user registration data.
@@ -67,20 +72,34 @@ class UserService:
                     },
                 ),
             )
-            verification_code = await create_verification_code()
-            verification_id = uuid4()
-            redis_key = f"verify:{verification_id}"
-            redis_value = json.dumps(
-                {
-                    "user_id": str(user.user_id),
-                    "verification_code": verification_code,
-                }
-            )
+        except UniqueViolation as exc:
+            self.__logger.exception("User with given unique data already exists.")
+            raise UserAlreadyExists from exc
+        except DriverError as exc:
+            self.__logger.exception("Database error during user creation.")
+            raise UserCreateError from exc
+
+        verification_code = await create_verification_code()
+        verification_id = uuid4()
+        redis_key = f"verify:{verification_id}"
+        redis_value = json.dumps(
+            {
+                "user_id": str(user.user_id),
+                "verification_code": verification_code,
+            },
+        )
+
+        try:
             await self.redis_repository.create(
                 redis_key=redis_key,
                 redis_value=redis_value,
-                expire_time=300
+                expire_time=300,
             )
+        except RedisError as exc:
+            self.__logger.exception("Failed to create verification entry in Redis.")
+            raise ErrorRedisCreate from exc
+
+        try:
             await self.rabbitmq_repository.create(
                 message=models.UserVerifiedEvent(
                     event="user.verification.requested",
@@ -93,27 +112,26 @@ class UserService:
                 ),
                 routing_key=settings.RABBITMQ.NOTIFICATION_KEY,
             )
-            return user.migrate(
-                model=models.UserRegisterResponse,
-                extra_fields={
-                    "verification_id": verification_id
-                }
-            )
-        except UniqueViolation:
-            raise UserAlreadyExists
-        except DriverError as exc:
-            raise UserCreateError from exc
+        except Exception as exc:
+            self.__logger.exception("Failed to publish verification event to RabbitMQ.")
+            raise ErrorPublishToRabbitMQ from exc
 
+        return user.migrate(
+            model=models.UserRegisterResponse,
+            extra_fields={"verification_id": verification_id},
+        )
 
-    async def verify_user_email(
-        self,
-        cmd: models.UserVerifyCommand
-    ) -> None:
-        """"""
+    async def verify_user_email(self, cmd: models.UserVerifyCommand) -> None:
+        """
+        Verifies a user's email address by checking the provided verification code.
+
+        Args:
+            cmd (models.UserVerifyCommand): Command object containing the verification ID and code.
+        """
 
         try:
             data = await self.redis_repository.read(
-                redis_key=f"verify:{cmd.verification_id}"
+                redis_key=f"verify:{cmd.verification_id}",
             )
         except RedisError as exc:
             self.__logger.exception("Error reading verification entry from Redis.")
@@ -150,7 +168,8 @@ class UserService:
         user: models.User,
         cmd: models.UserChangePasswordCommand,
     ) -> models.UserResponse:
-        """Changes the password of the authenticated user.
+        """
+        Changes the password of the authenticated user.
 
         Args:
             user (models.User): The currently authenticated user.
@@ -158,6 +177,7 @@ class UserService:
 
         Returns:
             models.UserResponse: The updated user with the new password.
+
         """
 
         if not check_password(cmd.old_password, user.hashed_password):
@@ -181,13 +201,15 @@ class UserService:
         self,
         cmd: models.UserUpdateDataCommand,
     ) -> models.UserResponse:
-        """Updates user data with the provided information.
+        """
+        Updates user data with the provided information.
 
         Args:
             cmd (models.UserUpdateDataCommand): Command containing new user data to update.
 
         Returns:
             models.UserResponse: The updated user data.
+
         """
         try:
             return await self.user_repository.update_data(cmd)

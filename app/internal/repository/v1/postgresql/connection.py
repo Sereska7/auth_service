@@ -1,4 +1,6 @@
-"""Create connection to postgresql."""
+"""
+Create connection to postgresql.
+"""
 
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator, Union
@@ -20,7 +22,8 @@ async def get_connection(
     return_engine: bool = False,
     engine: AsyncEngine = Provide[Connectors.postgresql.engine],
 ) -> AsyncGenerator[Union[AsyncSession, AsyncEngine], None]:
-    """Get async SQLAlchemy session or engine.
+    """
+    Get async SQLAlchemy session or engine.
 
     Args:
         session_factory:
@@ -38,6 +41,7 @@ async def get_connection(
 
     Yields:
         AsyncSession or AsyncEngine
+
     """
 
     if return_engine:

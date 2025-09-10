@@ -1,4 +1,6 @@
-"""Handler exception module."""
+"""
+Handler exception module.
+"""
 
 import asyncio
 import functools

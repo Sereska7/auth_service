@@ -1,4 +1,6 @@
-"""Authentication middleware for role-based authentication."""
+"""
+Authentication middleware for role-based authentication.
+"""
 
 from uuid import UUID
 
@@ -28,12 +30,10 @@ async def user_role_verification(
 ) -> None:
     if user_id is not None:
         try:
-            user: models.UserResponse = (
-                await user_service.user_repository.get_user_by_id(
-                    cmd=models.UserReadByIDCommand(
-                        user_id=UUID(user_id),
-                    ),
-                )
+            user: models.UserResponse = await user_service.user_repository.get_user_by_id(
+                cmd=models.UserReadByIDCommand(
+                    user_id=UUID(user_id),
+                ),
             )
         except EmptyResult:
             raise NotFoundError

@@ -1,4 +1,6 @@
-"""Collect response module."""
+"""
+Collect response module.
+"""
 
 from functools import wraps
 from typing import (

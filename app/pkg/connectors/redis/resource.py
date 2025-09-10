@@ -1,4 +1,6 @@
-"""Async resource for Redis connector."""
+"""
+Async resource for Redis connector.
+"""
 
 from redis.asyncio import ConnectionPool, from_url
 
@@ -8,22 +10,27 @@ __all__ = ["RedisResource"]
 
 
 class RedisResource(BaseAsyncResource):
-    """Redis connector using aiopg."""
+    """
+    Redis connector using aiopg.
+    """
 
     async def init(self, dsn: str, *args, **kwargs) -> ConnectionPool:
-        """Getting connection pool in asynchronous.
+        """
+        Getting connection pool in asynchronous.
 
         Args:
             dsn: D.S.N - Data Source Name.
 
         Returns:
             Created connection pool.
+
         """
 
         return await from_url(url=dsn, **kwargs)
 
     async def shutdown(self, resource: ConnectionPool) -> None:
-        """Close connection.
+        """
+        Close connection.
 
         Args:
             resource: Resource returned by :meth:`.Redis.init()` method.
@@ -33,6 +40,7 @@ class RedisResource(BaseAsyncResource):
             when the application is stopped
             or
             ``Closing`` provider is used.
+
         """
 
         await resource.disconnect()

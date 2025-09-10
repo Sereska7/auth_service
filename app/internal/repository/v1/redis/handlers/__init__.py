@@ -1,1 +1,3 @@
-"""Handlers for redis queries."""
+"""
+Handlers for redis queries.
+"""

@@ -1,4 +1,6 @@
-"""Module for inserting models into changelog asynchronously."""
+"""
+Module for inserting models into changelog asynchronously.
+"""
 
 from functools import wraps
 from typing import Any, Callable, List, Type, Union
@@ -17,7 +19,9 @@ logger = get_logger(__name__)
 
 
 def __convert_to_model(model_class: Type[BaseModel], data: dict) -> BaseModel:
-    """Convert a dictionary to an instance of the model class."""
+    """
+    Convert a dictionary to an instance of the model class.
+    """
 
     return model_class(**data)
 

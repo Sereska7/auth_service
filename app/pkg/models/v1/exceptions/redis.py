@@ -1,4 +1,6 @@
-"""Module with Redis exceptions for the application."""
+"""
+Module with Redis exceptions for the application.
+"""
 
 from starlette import status
 

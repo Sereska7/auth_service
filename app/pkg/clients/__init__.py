@@ -1,4 +1,6 @@
-"""V1 clients."""
+"""
+V1 clients.
+"""
 
 from dependency_injector import containers, providers
 
@@ -8,6 +10,8 @@ __all__ = ["Clients"]
 
 
 class Clients(containers.DeclarativeContainer):
-    """Container with clients."""
+    """
+    Container with clients.
+    """
 
     v1 = providers.Container(v1.Clients)

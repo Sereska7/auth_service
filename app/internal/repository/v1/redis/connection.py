@@ -1,4 +1,6 @@
-"""Create connection to redis."""
+"""
+Create connection to redis.
+"""
 
 from contextlib import asynccontextmanager
 from typing import Union
@@ -17,7 +19,8 @@ async def get_connection(
     pool: ConnectionPool = Provide[Connectors.redis.connector],
     return_pool: bool = False,
 ) -> Union[Connection, ConnectionPool]:
-    """Get async connection pool to redis.
+    """
+    Get async connection pool to redis.
 
     Args:
         pool:
@@ -27,6 +30,7 @@ async def get_connection(
 
     Returns:
         Async connection to redis.
+
     """
 
     if not isinstance(pool, ConnectionPool):

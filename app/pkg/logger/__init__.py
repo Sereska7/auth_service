@@ -1,4 +1,6 @@
-"""Logger module."""
+"""
+Logger module.
+"""
 
 # ruff: noqa
 
