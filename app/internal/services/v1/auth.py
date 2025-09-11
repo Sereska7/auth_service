@@ -19,7 +19,11 @@ from app.pkg.models.v1.exceptions.auth import (
     UserInactive,
 )
 from app.pkg.models.v1.exceptions.repository import DriverError, EmptyResult
-from app.pkg.models.v1.exceptions.user import UserNotFound, UserReadError, UserNotVerified
+from app.pkg.models.v1.exceptions.user import (
+    UserNotFound,
+    UserNotVerified,
+    UserReadError,
+)
 from app.pkg.settings import settings
 
 __all__ = ["AuthService"]

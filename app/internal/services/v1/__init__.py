@@ -26,11 +26,11 @@ class Services(containers.DeclarativeContainer):
 
     postgres_repositories: postgresql.Repositories = providers.Container(
         Repositories.v1.postgres,
-    ) # type: ignore
+    )  # type: ignore
 
     jwt_repositories: jwt.Repositories = providers.Container(
         Repositories.v1.jwt,
-    ) # type: ignore
+    )  # type: ignore
 
     clients: Clients = providers.Container(Clients)
 

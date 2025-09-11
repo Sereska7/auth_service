@@ -112,7 +112,9 @@ class UserService:
             try:
                 await self.redis_repository.delete(redis_key=redis_key)
             except RedisError as exc:
-                self.__logger.warning("Error deleting verification entry from Redis: %r", exc)
+                self.__logger.warning(
+                    "Error deleting verification entry from Redis: %r", exc
+                )
             raise ErrorPublishToRabbitMQ from exc
 
         return user.migrate(
@@ -153,7 +155,9 @@ class UserService:
         try:
             await self.redis_repository.delete(redis_key=redis_key)
         except RedisError as exc:
-            self.__logger.warning("Error deleting verification entry from Redis: %r", exc)
+            self.__logger.warning(
+                "Error deleting verification entry from Redis: %r", exc
+            )
 
         return user
 
@@ -184,7 +188,7 @@ class UserService:
             {
                 "user_id": str(user.user_id),
                 "verification_code": verification_code,
-                "new_hashed_password": new_hashed_password
+                "new_hashed_password": new_hashed_password,
             },
         )
 
@@ -216,22 +220,21 @@ class UserService:
             try:
                 await self.redis_repository.delete(redis_key=redis_key)
             except RedisError as exc:
-                self.__logger.warning("Error deleting verification entry from Redis: %r", exc)
+                self.__logger.warning(
+                    "Error deleting verification entry from Redis: %r", exc
+                )
             raise ErrorPublishToRabbitMQ from exc
 
         return user.migrate(
             model=models.UserVerificationResponse,
-            extra_fields={
-                "verification_id": verification_id
-            }
+            extra_fields={"verification_id": verification_id},
         )
 
     async def change_password_confirm(
-        self,
-        cmd: models.UserVerifyCommand
+        self, cmd: models.UserVerifyCommand
     ) -> models.UserResponse:
-        """Confirms a pending password change by validating the verification code and
-        applying the new hashed password stored in Redis.
+        """Confirms a pending password change by validating the verification
+        code and applying the new hashed password stored in Redis.
 
         Args:
             cmd (models.UserVerifyCommand): Command containing the verification ID and code.
@@ -266,7 +269,9 @@ class UserService:
         try:
             await self.redis_repository.delete(redis_key=redis_key)
         except RedisError as exc:
-            self.__logger.warning("Error deleting verification entry from Redis: %r", exc)
+            self.__logger.warning(
+                "Error deleting verification entry from Redis: %r", exc
+            )
 
         return user
 
@@ -292,11 +297,9 @@ class UserService:
         except DriverError as exc:
             raise UserUpdateError from exc
 
-    async def _read_verification_payload(
-        self,
-        redis_key: str
-    ) -> dict:
-        """Reads the verification payload from Redis and returns it as a dictionary.
+    async def _read_verification_payload(self, redis_key: str) -> dict:
+        """Reads the verification payload from Redis and returns it as a
+        dictionary.
 
         Args:
             redis_key (str): Redis key where the verification entry is stored.

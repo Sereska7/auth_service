@@ -82,7 +82,7 @@ async def change_password(
     description="""
     Description: Changes the password of the currently authenticated user.
     Used: Method is used when an authenticated user wants to update their password
-    """
+    """,
 )
 @inject
 async def verify_change_password(
