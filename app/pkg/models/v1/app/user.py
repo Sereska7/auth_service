@@ -17,7 +17,7 @@ __all__ = [
     "ServiceRoleEnum",
     "UserVerifiedEvent",
     "UserResponse",
-    "UserRegisterResponse",
+    "UserVerificationResponse",
     "UserRegisterCommand",
     "UserVerifyCommand",
     "UserCreateCommand",
@@ -168,7 +168,7 @@ class UserResponse(BaseUser):
     user_update_at: datetime | None = UserFields.user_update_at
 
 
-class UserRegisterResponse(BaseUser):
+class UserVerificationResponse(BaseUser):
     """Register response model for a user."""
 
     user_id: UUID = UserFields.user_id

@@ -15,7 +15,7 @@ router = APIRouter(prefix="/user", tags=["User"], route_class=RequestIDRoute)
 @router.post(
     "/register",
     status_code=status.HTTP_201_CREATED,
-    response_model=models.UserRegisterResponse,
+    response_model=models.UserVerificationResponse,
     description="""
     Description: Create new user.
     Used: Method is used to create user.
@@ -25,7 +25,7 @@ router = APIRouter(prefix="/user", tags=["User"], route_class=RequestIDRoute)
 async def register_user(
     cmd: models.UserRegisterCommand,
     user_service: UserService = Depends(Provide[Services.v1.user_service]),
-) -> models.UserRegisterResponse:
+) -> models.UserVerificationResponse:
     return await user_service.register_user(cmd)
 
 
@@ -57,6 +57,7 @@ async def verify_code(
 @router.patch(
     "/change_password",
     status_code=status.HTTP_200_OK,
+    response_model=models.UserVerificationResponse,
     description="""
     Description: Changes the password of the currently authenticated user.
     Used: Method is used when an authenticated user wants to update their password.
@@ -67,11 +68,29 @@ async def change_password(
     cmd: models.UserChangePasswordCommand,
     user_service: UserService = Depends(Provide[Services.v1.user_service]),
     current_user: models.User = Depends(get_current_user_from_auth),
-) -> models.UserResponse:
-    return await user_service.change_password(
+) -> models.UserVerificationResponse:
+    return await user_service.change_password_initiate(
         user=current_user,
         cmd=cmd,
     )
+
+
+@router.patch(
+    "/verify_change_password",
+    status_code=status.HTTP_200_OK,
+    response_model=models.UserResponse,
+    description="""
+    Description: Changes the password of the currently authenticated user.
+    Used: Method is used when an authenticated user wants to update their password
+    """
+)
+@inject
+async def verify_change_password(
+    cmd: models.UserVerifyCommand,
+    user_service: UserService = Depends(Provide[Services.v1.user_service]),
+    current_user: models.User = Depends(get_current_user_from_auth),
+) -> models.UserResponse:
+    return await user_service.change_password_confirm(cmd)
 
 
 @router.patch(

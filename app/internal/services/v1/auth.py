@@ -19,7 +19,7 @@ from app.pkg.models.v1.exceptions.auth import (
     UserInactive,
 )
 from app.pkg.models.v1.exceptions.repository import DriverError, EmptyResult
-from app.pkg.models.v1.exceptions.user import UserNotFound, UserReadError
+from app.pkg.models.v1.exceptions.user import UserNotFound, UserReadError, UserNotVerified
 from app.pkg.settings import settings
 
 __all__ = ["AuthService"]
@@ -62,12 +62,6 @@ class AuthService:
 
         Returns:
             models.TokenResponse: Contains access token, refresh token, and metadata.
-
-        Raises:
-            UserNotFound: If no user with the given email exists.
-            UserReadError: If there is a database error.
-            InvalidCredentials: If the password does not match.
-            UserInactive: If the user account is inactive.
         """
         try:
             user = await self.user_repository.get_user_by_email(cmd)
@@ -75,9 +69,6 @@ class AuthService:
             raise UserNotFound
         except DriverError as exc:
             raise UserReadError from exc
-
-        if not user:
-            raise InvalidCredentials
 
         if not check_password(cmd.user_password, user.hashed_password):
             raise InvalidCredentials
@@ -106,11 +97,17 @@ class AuthService:
         if user_id is None:
             raise InvalidTokenPayload
 
-        user = await self.user_repository.get_user_by_id(
-            cmd=models.UserReadByIDCommand(user_id=user_id),
-        )
-        if not user or not user.user_is_active:
+        try:
+            user = await self.user_repository.get_user_by_id(
+                cmd=models.UserReadByIDCommand(user_id=user_id),
+            )
+        except EmptyResult:
             raise UserNotFound
+        except DriverError as exc:
+            raise UserReadError from exc
+
+        if not user.user_is_active:
+            raise UserNotVerified
 
         access_token = self.jwt_handler.create_access_token({"user_id": str(user_id)})
         refresh_token = self.jwt_handler.create_refresh_token({"user_id": str(user_id)})
@@ -144,10 +141,10 @@ class AuthService:
                 cmd=models.UserReadByIDCommand(user_id=user_id),
             )
             return user
-        except DriverError as exc:
-            raise UserReadError from exc
         except EmptyResult as exc:
             raise UserNotFound from exc
+        except DriverError as exc:
+            raise UserReadError from exc
 
     @staticmethod
     def set_token_cookies(response: Response, tokens: models.TokenResponse) -> None:

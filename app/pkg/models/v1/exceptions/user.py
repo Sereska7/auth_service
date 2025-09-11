@@ -9,6 +9,7 @@ __all__ = [
     "UserReadError",
     "UserCreateError",
     "UserUpdateError",
+    "UserNotVerified",
     "UserAlreadyExists",
     "TokenNotFoundError",
     "VerificationCodeExpiredError",
@@ -50,6 +51,13 @@ class UserAlreadyExists(BaseAPIException):
 
     message = "User with this username already exists."
     status_code = status.HTTP_409_CONFLICT
+
+
+class UserNotVerified(BaseAPIException):
+    """Exception for a user whose email is not verified."""
+
+    message = "User email is not verified."
+    status_code = status.HTTP_403_FORBIDDEN
 
 
 class TokenNotFoundError(BaseAPIException):

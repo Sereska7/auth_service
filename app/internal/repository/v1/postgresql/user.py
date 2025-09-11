@@ -14,6 +14,8 @@ from app.pkg.models.sqlalchemy_models import User
 
 __all__ = ["UserRepository"]
 
+from app.pkg.models.v1.exceptions.repository import EmptyResult
+
 
 class UserRepository(Repository):
     """User repository implementation."""
@@ -82,6 +84,9 @@ class UserRepository(Repository):
             )
             user = result.scalar_one_or_none()
 
+            if user is None:
+                raise EmptyResult
+
             return models.UserResponse.model_validate(user)
 
     @collect_response
@@ -100,6 +105,9 @@ class UserRepository(Repository):
                 select(User).where(User.user_id == cmd.user_id),
             )
             user = result.scalar_one_or_none()
+
+            if user is None:
+                raise EmptyResult
 
             return models.User.model_validate(user)
 
@@ -123,9 +131,10 @@ class UserRepository(Repository):
             )
             user = result.scalar_one_or_none()
 
-            return models.User.model_validate(user, from_attributes=True).to_dict(
-                show_secrets=True,
-            )
+            if user is None:
+                raise EmptyResult
+
+            return models.User.model_validate(user)
 
     @collect_response
     async def update_data(

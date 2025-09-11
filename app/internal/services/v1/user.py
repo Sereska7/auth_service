@@ -47,14 +47,14 @@ class UserService:
     async def register_user(
         self,
         cmd: models.UserRegisterCommand,
-    ) -> models.UserRegisterResponse:
+    ) -> models.UserVerificationResponse:
         """Registers a new user in the system.
 
         Args:
             cmd (models.UserRegisterCommand): Command object containing user registration data.
 
         Returns:
-            models.UserRegisterResponse: The newly created user details.
+            models.UserVerificationResponse: The newly created user details.
         """
 
         try:
@@ -76,7 +76,7 @@ class UserService:
 
         verification_code = await create_verification_code()
         verification_id = uuid4()
-        redis_key = f"verify:{verification_id}"
+        redis_key = f"verify:email:{verification_id}"
         redis_value = json.dumps(
             {
                 "user_id": str(user.user_id),
@@ -109,10 +109,14 @@ class UserService:
             )
         except Exception as exc:
             self.__logger.exception("Failed to publish verification event to RabbitMQ.")
+            try:
+                await self.redis_repository.delete(redis_key=redis_key)
+            except RedisError as exc:
+                self.__logger.warning("Error deleting verification entry from Redis: %r", exc)
             raise ErrorPublishToRabbitMQ from exc
 
         return user.migrate(
-            model=models.UserRegisterResponse,
+            model=models.UserVerificationResponse,
             extra_fields={"verification_id": verification_id},
         )
 
@@ -127,23 +131,8 @@ class UserService:
             cmd (models.UserVerifyCommand): Command object containing the verification ID and code.
         """
 
-        try:
-            data = await self.redis_repository.read(
-                redis_key=f"verify:{cmd.verification_id}",
-            )
-        except RedisError as exc:
-            self.__logger.exception("Error reading verification entry from Redis.")
-            raise ErrorRedisRead from exc
-
-        if data is None:
-            self.__logger.info("Verification code not found or expired.")
-            raise VerificationCodeExpiredError
-
-        try:
-            code_payload = json.loads(data.decode())
-        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
-            self.__logger.exception("Failed to decode verification payload.")
-            raise InvalidVerificationPayloadError from exc
+        redis_key = f"verify:email:{cmd.verification_id}"
+        code_payload = await self._read_verification_payload(redis_key)
 
         user_id = code_payload.get("user_id")
         code = code_payload.get("verification_code")
@@ -162,46 +151,124 @@ class UserService:
             raise UserUpdateError from exc
 
         try:
-            await self.redis_repository.delete(
-                redis_key=f"verify:{cmd.verification_id}",
-            )
+            await self.redis_repository.delete(redis_key=redis_key)
         except RedisError as exc:
-            self.__logger.exception("Error deleting verification entry from Redis.")
-            raise ErrorRedisRead from exc
+            self.__logger.warning("Error deleting verification entry from Redis: %r", exc)
 
         return user
 
-    async def change_password(
+    async def change_password_initiate(
         self,
         user: models.User,
         cmd: models.UserChangePasswordCommand,
-    ) -> models.UserResponse:
-        """Changes the password of the authenticated user.
+    ) -> models.UserVerificationResponse:
+        """Initiates a password change for the authenticated user.
 
         Args:
             user (models.User): The currently authenticated user.
-            cmd (models.UserChangePasswordCommand): Command object containing old and new passwords.
+            cmd (models.UserChangePasswordCommand): Command containing old and new passwords.
 
         Returns:
-            models.UserResponse: The updated user with the new password.
+            models.UserVerificationResponse: Contains the verification_id required to
+                confirm and apply the password change.
         """
 
         if not check_password(cmd.old_password, user.hashed_password):
             raise InvalidCredentials
 
+        verification_code = await create_verification_code()
         new_hashed_password = bcrypt.hash(cmd.new_password)
+        verification_id = uuid4()
+        redis_key = f"verify:password:{verification_id}"
+        redis_value = json.dumps(
+            {
+                "user_id": str(user.user_id),
+                "verification_code": verification_code,
+                "new_hashed_password": new_hashed_password
+            },
+        )
+
+        try:
+            await self.redis_repository.create(
+                redis_key=redis_key,
+                redis_value=redis_value,
+                expire_time=300,
+            )
+        except RedisError as exc:
+            self.__logger.exception("Failed to create verification entry in Redis.")
+            raise ErrorRedisCreate from exc
+
+        try:
+            await self.rabbitmq_repository.create(
+                message=models.UserVerifiedEvent(
+                    event="user.change_password.requested",
+                    event_id=uuid4(),
+                    occurred_at=datetime.now(timezone.utc),
+                    verification_id=verification_id,
+                    user_id=user.user_id,
+                    email=user.user_email,
+                    verification_code=verification_code,
+                ),
+                routing_key=settings.RABBITMQ.NOTIFICATION_KEY,
+            )
+        except Exception as exc:
+            self.__logger.exception("Failed to publish verification event to RabbitMQ.")
+            try:
+                await self.redis_repository.delete(redis_key=redis_key)
+            except RedisError as exc:
+                self.__logger.warning("Error deleting verification entry from Redis: %r", exc)
+            raise ErrorPublishToRabbitMQ from exc
+
+        return user.migrate(
+            model=models.UserVerificationResponse,
+            extra_fields={
+                "verification_id": verification_id
+            }
+        )
+
+    async def change_password_confirm(
+        self,
+        cmd: models.UserVerifyCommand
+    ) -> models.UserResponse:
+        """Confirms a pending password change by validating the verification code and
+        applying the new hashed password stored in Redis.
+
+        Args:
+            cmd (models.UserVerifyCommand): Command containing the verification ID and code.
+
+        Returns:
+            models.UserResponse: The user with the updated password.
+        """
+
+        redis_key = f"verify:password:{cmd.verification_id}"
+        code_payload = await self._read_verification_payload(redis_key)
+
+        user_id = code_payload.get("user_id")
+        code = code_payload.get("verification_code")
+        new_hashed_password = code_payload.get("new_hashed_password")
+
+        if code != cmd.code:
+            self.__logger.info("Verification code mismatch.")
+            raise InvalidVerificationCodeError
+
         try:
             user = await self.user_repository.update_password(
                 cmd=models.UserPasswordUpdateCommand(
-                    user_id=user.user_id,
+                    user_id=user_id,
                     hash_password=new_hashed_password,
                 ),
             )
-            return user
         except EmptyResult:
             raise UserNotFound
         except DriverError as exc:
             raise UserUpdateError from exc
+
+        try:
+            await self.redis_repository.delete(redis_key=redis_key)
+        except RedisError as exc:
+            self.__logger.warning("Error deleting verification entry from Redis: %r", exc)
+
+        return user
 
     async def change_data(
         self,
@@ -215,6 +282,7 @@ class UserService:
         Returns:
             models.UserResponse: The updated user data.
         """
+
         try:
             return await self.user_repository.update_data(cmd)
         except EmptyResult:
@@ -223,3 +291,37 @@ class UserService:
             raise UserAlreadyExists
         except DriverError as exc:
             raise UserUpdateError from exc
+
+    async def _read_verification_payload(
+        self,
+        redis_key: str
+    ) -> dict:
+        """Reads the verification payload from Redis and returns it as a dictionary.
+
+        Args:
+            redis_key (str): Redis key where the verification entry is stored.
+
+        Returns:
+            dict: Parsed JSON payload containing verification data (e.g., user_id,
+                  verification_code, optional new_hashed_password, attempts/max_attempts).
+        """
+
+        try:
+            data = await self.redis_repository.read(
+                redis_key=redis_key,
+            )
+        except RedisError as exc:
+            self.__logger.exception("Error reading verification entry from Redis.")
+            raise ErrorRedisRead from exc
+
+        if data is None:
+            self.__logger.info("Verification code not found or expired.")
+            raise VerificationCodeExpiredError
+
+        try:
+            code_payload = json.loads(data.decode())
+        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+            self.__logger.exception("Failed to decode verification payload.")
+            raise InvalidVerificationPayloadError from exc
+
+        return code_payload
