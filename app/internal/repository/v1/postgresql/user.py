@@ -1,4 +1,4 @@
-"""Folder repository implementation."""
+"""User repository implementation."""
 
 from uuid import UUID
 
@@ -11,10 +11,9 @@ from app.internal.repository.v1.postgresql.handlers.collect_response import (
 )
 from app.pkg.models import v1 as models
 from app.pkg.models.sqlalchemy_models import User
+from app.pkg.models.v1.exceptions.repository import EmptyResult
 
 __all__ = ["UserRepository"]
-
-from app.pkg.models.v1.exceptions.repository import EmptyResult
 
 
 class UserRepository(Repository):
